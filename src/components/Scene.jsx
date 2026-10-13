@@ -27,7 +27,22 @@ export default function Scene({
       <VoxelClouds />
       <Rain />
       <ambientLight intensity={0.6} />
-      <directionalLight position={[10, 20, 10]} intensity={1.2} castShadow />
+      <directionalLight
+        position={[10, 24, 10]}
+        intensity={1.2}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-left={-40}
+        shadow-camera-right={40}
+        shadow-camera-top={40}
+        shadow-camera-bottom={-40}
+        shadow-camera-near={0.1}
+        shadow-camera-far={100}
+        shadow-bias={-0.00015}
+        shadow-normalBias={0.025}
+        shadow-radius={3}
+      />
 
       <Platforms
         platforms={level.platforms}

@@ -25,8 +25,8 @@ const ENEMY_SHADER_EFFECTS = {
     diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.4, 0.82, 1.0), wispWave * 0.28);
   `,
   orc: `
-    vec3 runeCell = floor(vEnemyPosition * 5.0);
-    float runeBits = step(0.84, enemyHash(runeCell.xz + floor(runeCell.y * 0.7)));
+    vec2 runeCell = floor(vEnemyPosition.xy * vec2(5.0, 6.0));
+    float runeBits = step(0.68, enemyHash(runeCell));
     float runePulse = 0.65 + 0.35 * sin(uEnemyTime * 4.0 + runeCell.y);
     enemyGlow = vec3(0.16, 1.0, 0.34) * runeBits * runePulse;
     diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.35, 1.0, 0.4), runeBits * runePulse * 0.62);
@@ -251,7 +251,12 @@ export default function Enemy({ enemy }) {
           </mesh>
           <mesh position={[0, 0.34, 0.27]} castShadow>
             <boxGeometry args={[0.82, 0.42, 0.16]} />
-            <meshStandardMaterial color="#4f3828" roughness={0.98} />
+            <meshStandardMaterial
+              color="#4f3828"
+              roughness={0.98}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
           </mesh>
           <mesh position={[0, 0.32, 0.36]} castShadow>
             <boxGeometry args={[0.45, 0.16, 0.06]} />
