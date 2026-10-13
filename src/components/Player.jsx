@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useKeyboard, readInput } from '../hooks/useKeyboard'
 import { stepPlayer, touchesCoin } from '../game/physics'
 import { getEnemyPosition, touchesEnemy } from '../game/enemies'
+import { getCoinPosition, getPlatformPosition } from '../game/platforms'
 import { COINS as DEFAULT_COINS, PLATFORMS as DEFAULT_PLATFORMS } from '../game/level'
 import { HALF, START, FALL_LIMIT, CAMERA_OFFSET, CAMERA_SMOOTHING } from '../game/constants'
 
@@ -19,6 +20,8 @@ export default function Player({
   const pos = useRef([...START])
   const vel = useRef([0, 0, 0])
   const onGround = useRef(false)
+  const groundPlatform = useRef(-1)
+  const platformPositions = useRef([])
   const jumpWasHeld = useRef(false)
   const taken = useRef(new Set())
   const fallReported = useRef(false)
@@ -39,6 +42,22 @@ export default function Player({
     )
     const p = pos.current
     const v = vel.current
+    const time = state.clock.elapsedTime
+    const activePlatforms = platforms.map((platform) => ({
+      ...platform,
+      pos: getPlatformPosition(platform, time),
+    }))
+    if (platformPositions.current.length !== platforms.length) {
+      platformPositions.current = activePlatforms.map((platform) => [...platform.pos])
+    }
+    if (onGround.current && groundPlatform.current !== -1) {
+      const previousPosition = platformPositions.current[groundPlatform.current]
+      const currentPosition = activePlatforms[groundPlatform.current]?.pos
+      if (previousPosition && currentPosition) {
+        p[0] += currentPosition[0] - previousPosition[0]
+        p[2] += currentPosition[2] - previousPosition[2]
+      }
+    }
     const input = readInput(keys.current)
     const jumpPressed = input.jump && !jumpWasHeld.current
     jumpWasHeld.current = input.jump
@@ -50,8 +69,16 @@ export default function Player({
       { ...input, jump: jumpPressed },
       onGround.current,
       dt,
-      platforms
+      activePlatforms
     )
+    groundPlatform.current = onGround.current
+      ? activePlatforms.findIndex((platform) => (
+        Math.abs(p[1] - (platform.pos[1] + platform.size[1] / 2 + HALF)) < 0.035 &&
+        Math.abs(p[0] - platform.pos[0]) < HALF + platform.size[0] / 2 &&
+        Math.abs(p[2] - platform.pos[2]) < HALF + platform.size[2] / 2
+      ))
+      : -1
+    platformPositions.current = activePlatforms.map((platform) => [...platform.pos])
 
     if (p[1] < FALL_LIMIT) {
       if (!fallReported.current) {
@@ -79,10 +106,11 @@ export default function Player({
 
     // Coin pickup
     coins.forEach((coin, i) => {
-      if (!taken.current.has(i) && touchesCoin(p, coin)) {
+      const coinPosition = getCoinPosition(coin, platforms[i + 1], time)
+      if (!taken.current.has(i) && touchesCoin(p, coinPosition)) {
         taken.current.add(i)
         shaderUniforms.pickupPulse.value = 1
-        onCoin(i)
+        onCoin(i, coinPosition)
       }
     })
 

@@ -13,6 +13,9 @@ keyboard or sound-button interaction to comply with browser autoplay rules.
 Collect every coin to advance through five differently themed platforming
 levels. Avoid the moving enemies; touching one or falling restarts the current
 level. Finish the last level to unlock the replay button.
+Earth, animated-water, and wooden-plank platform surfaces are procedurally
+shaded. Two platforms move on each level, carrying their coins and supporting
+the player while they move.
 
 ## Structure
 

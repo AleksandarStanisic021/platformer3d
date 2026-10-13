@@ -1,10 +1,19 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { getPlatformPosition } from '../game/platforms'
 
-export default function Coin({ position, collected }) {
+export default function Coin({ position, platform, collected }) {
   const ref = useRef()
-  useFrame((_, dt) => {
-    if (ref.current) ref.current.rotation.y += dt * 3
+  useFrame((state, dt) => {
+    if (!ref.current) return
+    ref.current.rotation.y += dt * 3
+    if (!platform?.motion) return
+    const movingPosition = getPlatformPosition(platform, state.clock.elapsedTime)
+    ref.current.position.set(
+      position[0] + movingPosition[0] - platform.pos[0],
+      position[1] + movingPosition[1] - platform.pos[1],
+      position[2] + movingPosition[2] - platform.pos[2]
+    )
   })
   if (collected) return null
   return (

@@ -55,7 +55,7 @@ export default function App() {
     }
   }, [restartGame])
 
-  const handleCoin = (index) => {
+  const handleCoin = (index, position) => {
     if (phaseRef.current !== 'playing' || collectedRef.current.has(index)) return
 
     playGameSound('coin')
@@ -63,7 +63,7 @@ export default function App() {
     setCollected(Array.from(collectedRef.current))
     setPickupEffects((previous) => [
       ...previous,
-      { id: nextEffectId.current++, position: level.coins[index] },
+      { id: nextEffectId.current++, position },
     ])
 
     if (collectedRef.current.size !== level.coins.length) return

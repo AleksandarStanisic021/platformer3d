@@ -30,7 +30,12 @@ export default function Scene({
         theme={level.theme}
       />
       {level.coins.map((c, i) => (
-        <Coin key={i} position={c} collected={collected.includes(i)} />
+        <Coin
+          key={i}
+          position={c}
+          platform={level.platforms[i + 1]}
+          collected={collected.includes(i)}
+        />
       ))}
       {level.enemies.map((enemy, i) => (
         <Enemy key={i} enemy={enemy} />

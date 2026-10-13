@@ -15,6 +15,11 @@ const LAYOUTS = [
     ],
     enemyPlatforms: [2, 5],
     enemyTypes: ['slime', 'wisp'],
+    surfaces: ['earth', 'wood', 'water', 'earth', 'wood', 'water', 'stone', 'wood'],
+    movingPlatforms: [
+      { index: 3, axis: 'x', range: 0.8, speed: 0.8, phase: 0 },
+      { index: 6, axis: 'z', range: 0.7, speed: 0.65, phase: 1 },
+    ],
   },
   {
     name: 'Violet Switchback',
@@ -28,6 +33,11 @@ const LAYOUTS = [
     ],
     enemyPlatforms: [2, 4, 6],
     enemyTypes: ['blaze', 'wisp', 'slime'],
+    surfaces: ['earth', 'water', 'wood', 'earth', 'water', 'wood', 'earth', 'stone'],
+    movingPlatforms: [
+      { index: 1, axis: 'x', range: 0.65, speed: 0.62, phase: 0.8 },
+      { index: 5, axis: 'z', range: 0.7, speed: 0.72, phase: 1.5 },
+    ],
   },
   {
     name: 'Magma Steps',
@@ -41,6 +51,11 @@ const LAYOUTS = [
     ],
     enemyPlatforms: [2, 5, 6],
     enemyTypes: ['blaze', 'slime', 'blaze'],
+    surfaces: ['earth', 'wood', 'water', 'wood', 'earth', 'water', 'wood', 'stone'],
+    movingPlatforms: [
+      { index: 1, axis: 'z', range: 0.65, speed: 0.7, phase: 0.4 },
+      { index: 4, axis: 'x', range: 0.7, speed: 0.6, phase: 1.8 },
+    ],
   },
   {
     name: 'Jade Circuit',
@@ -54,6 +69,11 @@ const LAYOUTS = [
     ],
     enemyPlatforms: [2, 4, 6],
     enemyTypes: ['slime', 'wisp', 'blaze'],
+    surfaces: ['earth', 'water', 'wood', 'earth', 'water', 'wood', 'water', 'wood'],
+    movingPlatforms: [
+      { index: 1, axis: 'x', range: 0.65, speed: 0.6, phase: 0.6 },
+      { index: 5, axis: 'z', range: 0.65, speed: 0.72, phase: 2 },
+    ],
   },
   {
     name: 'Aurora Spire',
@@ -67,6 +87,11 @@ const LAYOUTS = [
     ],
     enemyPlatforms: [2, 4, 6],
     enemyTypes: ['wisp', 'blaze', 'slime'],
+    surfaces: ['earth', 'wood', 'water', 'earth', 'wood', 'water', 'wood', 'stone'],
+    movingPlatforms: [
+      { index: 1, axis: 'z', range: 0.65, speed: 0.68, phase: 1 },
+      { index: 5, axis: 'x', range: 0.7, speed: 0.64, phase: 2.2 },
+    ],
   },
 ]
 
@@ -74,6 +99,12 @@ export const LEVELS = LAYOUTS.map((layout) => {
   const platforms = layout.platforms.map(([x, topY, z, width, depth]) => (
     plat(x, topY, z, width, depth)
   ))
+  layout.movingPlatforms.forEach(({ index, ...motion }) => {
+    platforms[index].motion = motion
+  })
+  platforms.forEach((platform, index) => {
+    platform.surface = layout.surfaces[index]
+  })
   const coins = platforms.slice(1).map((platform) => [
     platform.pos[0],
     platform.pos[1] + 1.5,
@@ -101,6 +132,7 @@ export const LEVELS = LAYOUTS.map((layout) => {
     name: layout.name,
     theme: layout.theme,
     colors: layout.colors,
+    surfaces: layout.surfaces,
     platforms,
     coins,
     enemies,
