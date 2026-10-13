@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { getWeatherState } from '../game/weather'
 
 const BLOCK_SIZE = 3
 
@@ -44,6 +45,15 @@ export default function VoxelClouds() {
     group.current.quaternion.copy(state.camera.quaternion)
     if (cloudLayer.current) {
       cloudLayer.current.position.x = Math.sin(state.clock.elapsedTime * 0.08) * 1.2
+      const { daylight, rain } = getWeatherState(state.clock.elapsedTime)
+      const cloudColor = rain > 0.1
+        ? '#aebdca'
+        : daylight < 0.18
+          ? '#8ca4c7'
+          : '#f7fcff'
+      cloudLayer.current.traverse((child) => {
+        if (child.isMesh && child.material) child.material.color.set(cloudColor)
+      })
     }
   })
 
@@ -71,16 +81,6 @@ export default function VoxelClouds() {
           </group>
         ))}
       </group>
-      <mesh position={[15, 13, -58]} renderOrder={-900}>
-        <boxGeometry args={[6, 6, 0.5]} />
-        <meshBasicMaterial
-          color="#ffe694"
-          toneMapped={false}
-          fog={false}
-          depthWrite={false}
-          depthTest={false}
-        />
-      </mesh>
     </group>
   )
 }

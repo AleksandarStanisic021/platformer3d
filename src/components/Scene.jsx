@@ -1,6 +1,7 @@
 import Platforms from './Platforms'
 import Sky from './Sky'
 import VoxelClouds from './VoxelClouds'
+import Rain from './Rain'
 import Coin from './Coin'
 import Enemy from './Enemy'
 import Player from './Player'
@@ -12,6 +13,7 @@ export default function Scene({
   collected,
   onCoin,
   onHazard,
+  onJump,
   pickupEffects,
   active,
 }) {
@@ -21,6 +23,7 @@ export default function Scene({
       <fog attach="fog" args={['#1b2a41', 30, 82]} />
       <Sky />
       <VoxelClouds />
+      <Rain />
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 20, 10]} intensity={1.2} castShadow />
 
@@ -53,6 +56,7 @@ export default function Scene({
         platforms={level.platforms}
         onCoin={onCoin}
         onHazard={onHazard}
+        onJump={onJump}
       />
     </>
   )

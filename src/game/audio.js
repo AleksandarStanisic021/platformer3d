@@ -1,5 +1,9 @@
 let audioContext
 let soundsEnabled = true
+let rainIntensity = 0
+let rainSource
+let rainGain
+let lastRainGain = 0
 
 const SOUND_PATTERNS = {
   jump: [
@@ -25,6 +29,46 @@ const SOUND_PATTERNS = {
 
 export function setGameSoundsEnabled(enabled) {
   soundsEnabled = enabled
+  syncRainAudio()
+}
+
+export function setRainSoundIntensity(intensity) {
+  rainIntensity = Math.max(0, Math.min(1, intensity))
+  syncRainAudio()
+}
+
+function syncRainAudio() {
+  if (!audioContext || audioContext.state !== 'running') return
+
+  const targetGain = soundsEnabled ? rainIntensity * 0.045 : 0
+  if (targetGain > 0.001 && !rainSource) {
+    const buffer = audioContext.createBuffer(
+      1,
+      audioContext.sampleRate * 2,
+      audioContext.sampleRate
+    )
+    const samples = buffer.getChannelData(0)
+    for (let i = 0; i < samples.length; i += 1) {
+      samples[i] = Math.random() * 2 - 1
+    }
+
+    const filter = audioContext.createBiquadFilter()
+    filter.type = 'lowpass'
+    filter.frequency.value = 2600
+    rainGain = audioContext.createGain()
+    rainGain.gain.value = 0
+    rainSource = audioContext.createBufferSource()
+    rainSource.buffer = buffer
+    rainSource.loop = true
+    rainSource.connect(filter)
+    filter.connect(rainGain)
+    rainGain.connect(audioContext.destination)
+    rainSource.start()
+  }
+
+  if (!rainGain || Math.abs(targetGain - lastRainGain) < 0.002) return
+  rainGain.gain.setTargetAtTime(targetGain, audioContext.currentTime, 0.16)
+  lastRainGain = targetGain
 }
 
 export function unlockGameAudio() {
@@ -34,9 +78,11 @@ export function unlockGameAudio() {
 
   if (!audioContext) audioContext = new AudioContextConstructor()
   if (audioContext.state === 'suspended') {
-    audioContext.resume().catch((error) => {
-      console.warn('Could not enable game audio.', error)
-    })
+    audioContext.resume()
+      .then(syncRainAudio)
+      .catch((error) => console.warn('Could not enable game audio.', error))
+  } else {
+    syncRainAudio()
   }
   return true
 }
