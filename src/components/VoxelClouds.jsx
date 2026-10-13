@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { getWeatherState } from '../game/weather'
 
 const BLOCK_SIZE = 3
+const CLOUD_COPY_OFFSETS = [-80, 0, 80]
 
 const CLOUDS = [
   {
@@ -44,7 +45,7 @@ export default function VoxelClouds() {
     group.current.position.copy(state.camera.position)
     group.current.quaternion.copy(state.camera.quaternion)
     if (cloudLayer.current) {
-      cloudLayer.current.position.x = Math.sin(state.clock.elapsedTime * 0.08) * 1.2
+      cloudLayer.current.position.x = ((state.clock.elapsedTime * 0.24 + 40) % 80) - 40
       const { daylight, rain } = getWeatherState(state.clock.elapsedTime)
       const cloudColor = rain > 0.1
         ? '#aebdca'
@@ -60,23 +61,27 @@ export default function VoxelClouds() {
   return (
     <group ref={group} frustumCulled={false}>
       <group ref={cloudLayer}>
-        {CLOUDS.map((cloud, cloudIndex) => (
-          <group key={cloudIndex} position={cloud.position}>
-            {cloud.blocks.map(([x, y, z], blockIndex) => (
-              <mesh
-                key={blockIndex}
-                position={[x * BLOCK_SIZE, y * BLOCK_SIZE * 0.55, z * BLOCK_SIZE]}
-                renderOrder={-900}
-              >
-                <boxGeometry args={[BLOCK_SIZE, BLOCK_SIZE * 0.55, BLOCK_SIZE]} />
-                <meshBasicMaterial
-                  color="#f7fcff"
-                  toneMapped={false}
-                  fog={false}
-                  depthWrite={false}
-                  depthTest={false}
-                />
-              </mesh>
+        {CLOUD_COPY_OFFSETS.map((offset) => (
+          <group key={offset} position={[offset, 0, 0]}>
+            {CLOUDS.map((cloud, cloudIndex) => (
+              <group key={cloudIndex} position={cloud.position}>
+                {cloud.blocks.map(([x, y, z], blockIndex) => (
+                  <mesh
+                    key={blockIndex}
+                    position={[x * BLOCK_SIZE, y * BLOCK_SIZE * 0.55, z * BLOCK_SIZE]}
+                    renderOrder={-900}
+                  >
+                    <boxGeometry args={[BLOCK_SIZE, BLOCK_SIZE * 0.55, BLOCK_SIZE]} />
+                    <meshBasicMaterial
+                      color="#f7fcff"
+                      toneMapped={false}
+                      fog={false}
+                      depthWrite={false}
+                      depthTest={false}
+                    />
+                  </mesh>
+                ))}
+              </group>
             ))}
           </group>
         ))}
