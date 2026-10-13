@@ -87,7 +87,7 @@ export default function Hud({
         }}>
           <div>
             <div style={{ fontSize: 38, fontWeight: 800 }}>
-              {phase === 'won' ? 'You beat all 5 levels!' : 'Level complete!'}
+              {phase === 'won' ? 'Great platforming!' : 'Level complete!'}
             </div>
             {phase === 'won' ? (
               <>

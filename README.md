@@ -11,9 +11,10 @@ coin pickups, hazards, and level completion. Audio starts after the first
 keyboard or sound-button interaction to comply with browser autoplay rules;
 procedural rain ambience also follows the storm cycle and sound toggle.
 
-Collect every coin to advance through five differently themed platforming
-levels. Avoid the moving enemies; touching one or falling restarts the current
-level. Finish the last level to unlock the replay button.
+Collect every coin to advance through infinitely many platforming levels.
+The first five levels have handcrafted themes; subsequent levels use
+deterministic random layouts and rotate through the biomes. Avoid the moving
+enemies; touching one or falling restarts the current level.
 Earth, animated-water, and wooden-plank platform surfaces are procedurally
 shaded. Two platforms move on each level, carrying their coins and supporting
 the player while they move.

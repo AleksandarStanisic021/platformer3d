@@ -133,6 +133,52 @@ export default function Platforms({
                   }
                   diffuseColor.rgb = mix(diffuseColor.rgb, platformAccent, platformPattern * 0.58);
                 }
+
+                vec3 biomeBase;
+                if (uTheme < 0.5) {
+                  biomeBase = vec3(0.08, 0.34, 0.42);
+                } else if (uTheme < 1.5) {
+                  biomeBase = vec3(0.3, 0.12, 0.48);
+                } else if (uTheme < 2.5) {
+                  biomeBase = vec3(0.48, 0.12, 0.035);
+                } else if (uTheme < 3.5) {
+                  biomeBase = vec3(0.08, 0.36, 0.17);
+                } else {
+                  biomeBase = vec3(0.16, 0.19, 0.52);
+                }
+                diffuseColor.rgb = mix(diffuseColor.rgb, biomeBase, 0.28 - topFace * 0.08);
+
+                float biomePattern;
+                vec3 biomeAccent;
+                if (uTheme < 0.5) {
+                  biomeAccent = vec3(0.05, 0.78, 0.86);
+                  float ruinLines = sin(surfaceUv.x * 3.0 + sin(surfaceUv.y * 0.8) + uTime * 0.25);
+                  biomePattern = 1.0 - smoothstep(0.86, 0.98, abs(ruinLines));
+                } else if (uTheme < 1.5) {
+                  biomeAccent = vec3(0.78, 0.3, 1.0);
+                  float crystalGrid = sin(surfaceUv.x * 2.5 + surfaceUv.y * 2.5)
+                    * sin(surfaceUv.x * 2.5 - surfaceUv.y * 2.5);
+                  biomePattern = 1.0 - smoothstep(0.78, 0.96, abs(crystalGrid));
+                } else if (uTheme < 2.5) {
+                  biomeAccent = vec3(1.0, 0.23, 0.025);
+                  float magmaCracks = sin(surfaceUv.x * 2.1 + sin(surfaceUv.y * 3.0))
+                    * sin(surfaceUv.y * 2.0 - uTime * 0.35);
+                  biomePattern = 1.0 - smoothstep(0.9, 0.99, abs(magmaCracks));
+                } else if (uTheme < 3.5) {
+                  biomeAccent = vec3(0.18, 0.92, 0.38);
+                  vec2 leafCell = floor(surfaceUv * 2.0);
+                  float leafSpots = platformHash(leafCell + floor(uTime * 0.16));
+                  biomePattern = smoothstep(0.78, 0.96, leafSpots);
+                } else {
+                  biomeAccent = vec3(0.55, 0.24, 1.0);
+                  float auroraBands = sin(surfaceUv.x * 1.2 + sin(surfaceUv.y * 1.7 - uTime * 0.8) * 1.7);
+                  biomePattern = smoothstep(0.35, 0.9, auroraBands);
+                }
+                diffuseColor.rgb = mix(
+                  diffuseColor.rgb,
+                  biomeAccent,
+                  biomePattern * (uSurface > 2.5 ? 0.24 : 0.32) * topFace
+                );
                 `
               )
               .replace(

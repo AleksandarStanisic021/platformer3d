@@ -95,11 +95,11 @@ const LAYOUTS = [
   },
 ]
 
-export const LEVELS = LAYOUTS.map((layout) => {
+const createLevel = (layout, movingPlatforms = layout.movingPlatforms) => {
   const platforms = layout.platforms.map(([x, topY, z, width, depth]) => (
     plat(x, topY, z, width, depth)
   ))
-  layout.movingPlatforms.forEach(({ index, ...motion }) => {
+  movingPlatforms.forEach(({ index, ...motion }) => {
     platforms[index].motion = motion
   })
   platforms.forEach((platform, index) => {
@@ -137,6 +137,90 @@ export const LEVELS = LAYOUTS.map((layout) => {
     coins,
     enemies,
   }
-})
+}
+
+export const LEVELS = LAYOUTS.map(createLevel)
+
+const randomFrom = (seed) => {
+  let state = seed >>> 0
+  return () => {
+    state += 0x6D2B79F5
+    let value = state
+    value = Math.imul(value ^ (value >>> 15), value | 1)
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61)
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const getRandomMovingPlatforms = (platformData, random) => {
+  const candidateIndices = Array.from(
+    { length: platformData.length - 2 },
+    (_, index) => index + 1
+  )
+
+  for (let index = candidateIndices.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1))
+    ;[candidateIndices[index], candidateIndices[swapIndex]] = [
+      candidateIndices[swapIndex],
+      candidateIndices[index],
+    ]
+  }
+
+  const movingCount = 2 + Math.floor(random() * 3)
+  return candidateIndices.slice(0, movingCount).map((platformIndex) => {
+    const platform = platformData[platformIndex]
+    const axis = random() > 0.5 ? 'x' : 'z'
+    const axisSize = axis === 'x' ? platform[3] : platform[4]
+    return {
+      index: platformIndex,
+      axis,
+      range: Math.min(0.65, Math.max(0.3, axisSize / 2 - 1.2)),
+      speed: 0.45 + random() * 0.45,
+      phase: random() * Math.PI * 2,
+    }
+  })
+}
+
+export function getLevel(index) {
+  if (index < LEVELS.length) {
+    const layout = LAYOUTS[index]
+    const random = randomFrom((index + 1) * 7919)
+    return createLevel(
+      layout,
+      getRandomMovingPlatforms(layout.platforms, random)
+    )
+  }
+
+  const biome = LAYOUTS[index % LAYOUTS.length]
+  const random = randomFrom((index + 1) * 7919)
+  const platformData = [[0, 0, 0, 8, 8]]
+  let x = 0
+  let topY = 0
+  let z = 0
+
+  for (let platformIndex = 1; platformIndex < 8; platformIndex += 1) {
+    x += Math.round((random() * 2 - 1) * 2.4 * 2) / 2
+    x = Math.max(-8, Math.min(8, x))
+    z -= 5.2 + random() * 0.65
+    topY += 0.35 + random() * 0.28
+    const size = platformIndex === 7 ? 6 : 3.9 + random() * 0.3
+    platformData.push([x, topY, z, size, size])
+  }
+
+  const layout = {
+    ...biome,
+    name: `${biome.name} ${Math.floor(index / LAYOUTS.length) + 1}`,
+    platforms: platformData,
+    surfaces: platformData.map((_, platformIndex) => (
+      biome.surfaces[(platformIndex + index) % biome.surfaces.length]
+    )),
+    enemyPlatforms: [2, 4, 6],
+    enemyTypes: ['slime', 'wisp', 'blaze'].map((_, enemyIndex) => (
+      ['slime', 'wisp', 'blaze'][(enemyIndex + index) % 3]
+    )),
+  }
+
+  return createLevel(layout, getRandomMovingPlatforms(platformData, random))
+}
 
 export const { platforms: PLATFORMS, coins: COINS } = LEVELS[0]

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Scene from './components/Scene'
 import Hud from './components/Hud'
-import { LEVELS } from './game/level'
+import { getLevel } from './game/level'
 import { CAMERA_OFFSET } from './game/constants'
 import { playGameSound, setGameSoundsEnabled, unlockGameAudio } from './game/audio'
 
@@ -20,7 +20,7 @@ export default function App() {
   const nextEffectId = useRef(0)
   const transitionTimeout = useRef()
   const statusTimeout = useRef()
-  const level = LEVELS[levelIndex]
+  const level = getLevel(levelIndex)
 
   const updatePhase = (nextPhase) => {
     phaseRef.current = nextPhase
@@ -71,11 +71,6 @@ export default function App() {
     playGameSound('level')
     updatePhase('transition')
     transitionTimeout.current = window.setTimeout(() => {
-      if (levelIndex === LEVELS.length - 1) {
-        updatePhase('won')
-        return
-      }
-
       collectedRef.current.clear()
       setCollected([])
       setPickupEffects([])
@@ -130,7 +125,7 @@ export default function App() {
         total={level.coins.length}
         level={levelIndex + 1}
         levelName={level.name}
-        levelCount={LEVELS.length}
+        levelCount="∞"
         phase={phase}
         status={status}
         onRestart={restartGame}
