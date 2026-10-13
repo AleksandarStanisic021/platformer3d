@@ -16,10 +16,10 @@ growls, and airy chimes.
 Collect every coin to advance through infinitely many platforming levels.
 The first five levels have handcrafted themes; subsequent levels use
 deterministic random layouts and rotate through the biomes. Each biome features
-a block-built orc enemy, alongside slimes, blazes, wisps, tiny dragons, goo
+a flashy fire elemental, alongside slimes, blazes, wisps, tiny dragons, goo
 creatures, and zombies. Animated procedural shader patterns add pulsing spots,
-fire bands, spectral waves, dragon scales, goo bubbles, zombie stitches, and
-glowing orc runes to their voxel bodies.
+fire bands, spectral waves, dragon scales, goo bubbles, and zombie stitches to
+their voxel bodies.
 Enemies, wildlife, plants, and castle structures cast detailed soft shadows
 onto platforms and nearby surfaces.
 Voxel farm and forest animals—including pigs, cows, sheep, chickens, wolves,
@@ -33,7 +33,7 @@ Earth, animated-water, and wooden-plank platform surfaces are procedurally
 shaded. Between two and four platforms move on each level, carrying their coins
 and supporting the player while they move.
 The voxel sky drifts through day, sunset, night, and overcast weather, with
-animated rain during storms.
+lightweight animated rain during storms.
 
 ## Structure
 

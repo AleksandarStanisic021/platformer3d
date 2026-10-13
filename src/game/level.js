@@ -14,7 +14,7 @@ const LAYOUTS = [
       [-7, 5.5, -27, 4, 4], [-12, 6.5, -23, 6, 6],
     ],
     enemyPlatforms: [2, 5],
-    enemyTypes: ['slime', 'orc'],
+    enemyTypes: ['slime', 'fireElemental'],
     surfaces: ['earth', 'wood', 'water', 'earth', 'wood', 'water', 'stone', 'wood'],
     movingPlatforms: [
       { index: 3, axis: 'x', range: 0.8, speed: 0.8, phase: 0 },
@@ -50,7 +50,7 @@ const LAYOUTS = [
       [4, 5.5, -34, 6, 6],
     ],
     enemyPlatforms: [2, 5, 6],
-    enemyTypes: ['orc', 'zombie', 'blaze'],
+    enemyTypes: ['fireElemental', 'zombie', 'blaze'],
     surfaces: ['earth', 'wood', 'water', 'wood', 'earth', 'water', 'wood', 'stone'],
     movingPlatforms: [
       { index: 1, axis: 'z', range: 0.65, speed: 0.7, phase: 0.4 },
@@ -86,7 +86,7 @@ const LAYOUTS = [
       [-12, 5.6, -35, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['wisp', 'orc', 'goo'],
+    enemyTypes: ['wisp', 'fireElemental', 'goo'],
     surfaces: ['earth', 'wood', 'water', 'earth', 'wood', 'water', 'wood', 'stone'],
     movingPlatforms: [
       { index: 1, axis: 'z', range: 0.65, speed: 0.68, phase: 1 },
@@ -156,7 +156,7 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) =
       center: [
         platform.pos[0],
         platform.pos[1] + (
-          type === 'orc' || type === 'zombie' ? 0.5 :
+          type === 'fireElemental' || type === 'zombie' ? 0.5 :
             type === 'dragon' || type === 'goo' ? 0.35 : 0.95
         ),
         platform.pos[2],
@@ -287,8 +287,8 @@ export function getLevel(index) {
       biome.surfaces[(platformIndex + index) % biome.surfaces.length]
     )),
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['orc', 'wisp', 'blaze'].map((_, enemyIndex) => (
-      ['orc', 'wisp', 'blaze', 'dragon', 'goo', 'zombie'][(enemyIndex + index) % 6]
+    enemyTypes: ['fireElemental', 'wisp', 'blaze'].map((_, enemyIndex) => (
+      ['fireElemental', 'wisp', 'blaze', 'dragon', 'goo', 'zombie'][(enemyIndex + index) % 6]
     )),
   }
 

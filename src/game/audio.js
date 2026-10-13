@@ -40,9 +40,9 @@ const ENEMY_SOUND_NOTES = {
     { frequency: 680, endFrequency: 910, duration: 0.32, waveform: 'sine' },
     { frequency: 980, endFrequency: 740, duration: 0.24, delay: 0.12, waveform: 'sine' },
   ],
-  orc: [
-    { frequency: 105, endFrequency: 78, duration: 0.3, waveform: 'sawtooth' },
-    { frequency: 145, endFrequency: 115, duration: 0.2, delay: 0.18, waveform: 'triangle' },
+  fireElemental: [
+    { frequency: 145, endFrequency: 72, duration: 0.32, waveform: 'sawtooth' },
+    { frequency: 520, endFrequency: 280, duration: 0.2, delay: 0.12, waveform: 'triangle' },
   ],
   dragon: [
     { frequency: 185, endFrequency: 92, duration: 0.3, waveform: 'sawtooth' },

@@ -4,7 +4,7 @@ import { Object3D } from 'three'
 import { setRainSoundIntensity } from '../game/audio'
 import { getWeatherState } from '../game/weather'
 
-const DROP_COUNT = 150
+const DROP_COUNT = 70
 
 const seeded = (value) => {
   const result = Math.sin(value * 127.1 + 311.7) * 43758.5453
@@ -31,7 +31,7 @@ export default function Rain() {
     mesh.visible = rain > 0.01
     if (!mesh.visible) return
 
-    mesh.material.opacity = 0.58 * rain
+    mesh.material.opacity = 0.38 * rain
     positions.forEach((position, index) => {
       position[1] -= delta * 17
       if (position[1] < -9) position[1] = 11 + seeded(index + state.clock.elapsedTime) * 4
