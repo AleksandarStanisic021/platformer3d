@@ -2,16 +2,23 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useKeyboard, readInput } from '../hooks/useKeyboard'
 import { stepPlayer, touchesCoin } from '../game/physics'
-import { COINS } from '../game/level'
+import { COINS as DEFAULT_COINS, PLATFORMS as DEFAULT_PLATFORMS } from '../game/level'
 import { HALF, START, FALL_LIMIT, CAMERA_OFFSET, CAMERA_SMOOTHING } from '../game/constants'
 
-export default function Player({ onCoin }) {
+export default function Player({
+  onCoin,
+  onFall,
+  active = true,
+  coins = DEFAULT_COINS,
+  platforms = DEFAULT_PLATFORMS,
+}) {
   const mesh = useRef()
   const pos = useRef([...START])
   const vel = useRef([0, 0, 0])
   const onGround = useRef(false)
   const jumpWasHeld = useRef(false)
   const taken = useRef(new Set())
+  const fallReported = useRef(false)
   const keys = useKeyboard()
   const shaderUniforms = useMemo(() => ({
     time: { value: 0 },
@@ -19,6 +26,8 @@ export default function Player({ onCoin }) {
   }), [])
 
   useFrame((state, delta) => {
+    if (!active) return
+
     const dt = Math.min(delta, 0.033)
     shaderUniforms.time.value += dt
     shaderUniforms.pickupPulse.value = Math.max(
@@ -36,17 +45,25 @@ export default function Player({ onCoin }) {
       v,
       { ...input, jump: jumpPressed },
       onGround.current,
-      dt
+      dt,
+      platforms
     )
 
-    // Fell off the world -> back to start
     if (p[1] < FALL_LIMIT) {
-      p[0] = START[0]; p[1] = START[1]; p[2] = START[2]
+      if (!fallReported.current) {
+        fallReported.current = true
+        onFall?.()
+      }
+      p[0] = START[0]
+      p[1] = START[1]
+      p[2] = START[2]
       v[1] = 0
+      onGround.current = false
+      return
     }
 
     // Coin pickup
-    COINS.forEach((coin, i) => {
+    coins.forEach((coin, i) => {
       if (!taken.current.has(i) && touchesCoin(p, coin)) {
         taken.current.add(i)
         shaderUniforms.pickupPulse.value = 1

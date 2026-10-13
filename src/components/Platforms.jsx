@@ -1,16 +1,16 @@
 import { useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { PLATFORMS } from '../game/level'
+import { PLATFORMS as DEFAULT_PLATFORMS } from '../game/level'
 
-export default function Platforms() {
+export default function Platforms({ platforms = DEFAULT_PLATFORMS }) {
   const shaderUniforms = useMemo(() => ({ time: { value: 0 } }), [])
 
   useFrame((_, delta) => {
     shaderUniforms.time.value += delta
   })
 
-  return PLATFORMS.map((pl, i) => {
-    const isGoal = i === PLATFORMS.length - 1
+  return platforms.map((pl, i) => {
+    const isGoal = i === platforms.length - 1
     return (
       <mesh key={i} position={pl.pos} receiveShadow>
         <boxGeometry args={pl.size} />

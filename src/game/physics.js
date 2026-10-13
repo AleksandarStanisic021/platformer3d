@@ -10,12 +10,12 @@ const overlaps = (p, pl) =>
 
 // Move along one axis (0=x, 1=y, 2=z) and push back out of any platform hit.
 // Returns true if a platform was hit.
-export function moveAxis(p, axis, velocity, dt) {
+export function moveAxis(p, axis, velocity, dt, platforms = PLATFORMS) {
   if (velocity === 0) return false
 
   p[axis] += velocity * dt
   let hit = false
-  for (const pl of PLATFORMS) {
+  for (const pl of platforms) {
     if (overlaps(p, pl)) {
       const half = pl.size[axis] / 2
       p[axis] = velocity > 0 ? pl.pos[axis] - half - HALF : pl.pos[axis] + half + HALF
@@ -27,15 +27,15 @@ export function moveAxis(p, axis, velocity, dt) {
 
 // Advance the player one step. `input` = { x, z, jump }. Mutates pos and vel.
 // Returns whether the player is standing on something.
-export function stepPlayer(pos, vel, input, onGround, dt) {
+export function stepPlayer(pos, vel, input, onGround, dt, platforms = PLATFORMS) {
   vel[0] = input.x * SPEED
   vel[2] = input.z * SPEED
   if (input.jump && onGround) vel[1] = JUMP
   vel[1] -= GRAVITY * dt
 
-  moveAxis(pos, 0, vel[0], dt)
-  moveAxis(pos, 2, vel[2], dt)
-  const hitY = moveAxis(pos, 1, vel[1], dt)
+  moveAxis(pos, 0, vel[0], dt, platforms)
+  moveAxis(pos, 2, vel[2], dt, platforms)
+  const hitY = moveAxis(pos, 1, vel[1], dt, platforms)
 
   const grounded = hitY && vel[1] < 0
   if (hitY) vel[1] = 0
