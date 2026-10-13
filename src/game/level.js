@@ -139,7 +139,7 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms) => {
   }
 }
 
-export const LEVELS = LAYOUTS.map(createLevel)
+export const LEVELS = LAYOUTS.map((layout) => createLevel(layout))
 
 const randomFrom = (seed) => {
   let state = seed >>> 0
