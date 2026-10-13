@@ -1,7 +1,74 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { getEnemyPosition } from '../game/enemies'
 import { playEnemySound } from '../game/audio'
+
+const ENEMY_SHADER_EFFECTS = {
+  slime: `
+    float spotNoise = enemyHash(floor(vEnemyPosition.xz * 8.0));
+    float spots = smoothstep(0.72, 0.9, spotNoise);
+    float slimePulse = 0.5 + 0.5 * sin(uEnemyTime * 3.2 + vEnemyPosition.y * 7.0);
+    enemyGlow = vec3(0.2, 1.0, 0.08) * (spots * 0.5 + slimePulse * 0.12);
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.48, 1.0, 0.25), spots * 0.48);
+  `,
+  blaze: `
+    float fireWave = 0.5 + 0.5 * sin(vEnemyPosition.y * 16.0 - uEnemyTime * 5.0);
+    float fireFlicker = 0.72 + 0.28 * sin(uEnemyTime * 13.0 + vEnemyPosition.x * 9.0);
+    enemyGlow = vec3(1.0, 0.2 + fireWave * 0.38, 0.015) * fireWave * fireFlicker;
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, 0.32, 0.025), fireWave * 0.34);
+  `,
+  wisp: `
+    float wispWave = 0.5 + 0.5 * sin(vEnemyPosition.y * 9.0 + uEnemyTime * 3.0
+      + sin(vEnemyPosition.x * 7.0 + uEnemyTime * 1.6));
+    float wispGrid = step(0.76, enemyHash(floor(vEnemyPosition.xz * 11.0)));
+    enemyGlow = vec3(0.16, 0.62, 1.0) * (0.24 + wispWave * 0.52 + wispGrid * 0.22);
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.4, 0.82, 1.0), wispWave * 0.28);
+  `,
+  orc: `
+    vec3 runeCell = floor(vEnemyPosition * 5.0);
+    float runeBits = step(0.84, enemyHash(runeCell.xz + floor(runeCell.y * 0.7)));
+    float runePulse = 0.65 + 0.35 * sin(uEnemyTime * 4.0 + runeCell.y);
+    enemyGlow = vec3(0.16, 1.0, 0.34) * runeBits * runePulse;
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.35, 1.0, 0.4), runeBits * runePulse * 0.62);
+  `,
+}
+
+function applyEnemyShader(shader, uniforms, effect) {
+  shader.uniforms.uEnemyTime = uniforms.time
+  shader.vertexShader = shader.vertexShader
+    .replace(
+      '#include <common>',
+      `#include <common>
+      varying vec3 vEnemyPosition;`
+    )
+    .replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+      vEnemyPosition = position;`
+    )
+  shader.fragmentShader = shader.fragmentShader
+    .replace(
+      '#include <common>',
+      `#include <common>
+      uniform float uEnemyTime;
+      varying vec3 vEnemyPosition;
+
+      float enemyHash(vec2 point) {
+        return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
+      }`
+    )
+    .replace(
+      '#include <color_fragment>',
+      `#include <color_fragment>
+      vec3 enemyGlow = vec3(0.0);
+      ${ENEMY_SHADER_EFFECTS[effect] ?? ENEMY_SHADER_EFFECTS.slime}`
+    )
+    .replace(
+      '#include <emissivemap_fragment>',
+      `#include <emissivemap_fragment>
+      totalEmissiveRadiance += enemyGlow;`
+    )
+}
 
 export default function Enemy({ enemy }) {
   const group = useRef()
@@ -9,9 +76,11 @@ export default function Enemy({ enemy }) {
   const orbit = useRef()
   const tail = useRef()
   const nextSoundTime = useRef(0)
+  const shaderUniforms = useMemo(() => ({ time: { value: 0 } }), [])
 
   useFrame((state, delta) => {
     if (!group.current) return
+    shaderUniforms.time.value = state.clock.elapsedTime
     const position = getEnemyPosition(enemy, state.clock.elapsedTime)
     group.current.position.set(...position)
     const distanceToCamera = state.camera.position.distanceTo(group.current.position)
@@ -43,7 +112,12 @@ export default function Enemy({ enemy }) {
         <>
           <mesh ref={core} castShadow>
             <boxGeometry args={[0.78, 0.62, 0.72]} />
-            <meshStandardMaterial color="#78d957" roughness={0.82} />
+            <meshStandardMaterial
+              color="#78d957"
+              roughness={0.82}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
           </mesh>
           <mesh position={[-0.18, 0.08, 0.375]}>
             <boxGeometry args={[0.1, 0.12, 0.035]} />
@@ -73,7 +147,14 @@ export default function Enemy({ enemy }) {
         <>
           <mesh ref={core} position={[0, 0.04, 0]} castShadow>
             <boxGeometry args={[0.52, 0.56, 0.48]} />
-            <meshStandardMaterial color="#c94727" emissive="#77220d" emissiveIntensity={0.65} roughness={0.72} />
+            <meshStandardMaterial
+              color="#c94727"
+              emissive="#77220d"
+              emissiveIntensity={0.65}
+              roughness={0.72}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
           </mesh>
           <mesh position={[0, 0.46, 0]} castShadow>
             <boxGeometry args={[0.44, 0.3, 0.42]} />
@@ -118,6 +199,8 @@ export default function Enemy({ enemy }) {
               emissive="#253e8e"
               emissiveIntensity={0.8}
               roughness={0.68}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
             />
           </mesh>
           <mesh position={[-0.15, 0.18, 0.285]}>
@@ -150,11 +233,21 @@ export default function Enemy({ enemy }) {
         <>
           <mesh position={[0, 0.32, 0]} castShadow>
             <boxGeometry args={[0.72, 0.92, 0.48]} />
-            <meshStandardMaterial color="#386f3c" roughness={0.88} />
+            <meshStandardMaterial
+              color="#386f3c"
+              roughness={0.88}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
           </mesh>
           <mesh ref={core} position={[0, 1.02, 0.02]} castShadow>
             <boxGeometry args={[0.78, 0.72, 0.62]} />
-            <meshStandardMaterial color="#57934c" roughness={0.88} />
+            <meshStandardMaterial
+              color="#57934c"
+              roughness={0.88}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
           </mesh>
           <mesh position={[0, 0.34, 0.27]} castShadow>
             <boxGeometry args={[0.82, 0.42, 0.16]} />

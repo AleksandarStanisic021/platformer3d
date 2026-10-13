@@ -17,6 +17,8 @@ Collect every coin to advance through infinitely many platforming levels.
 The first five levels have handcrafted themes; subsequent levels use
 deterministic random layouts and rotate through the biomes. Each biome features
 a block-built orc enemy, alongside the existing slime, blaze, and wisp foes.
+Animated procedural shader patterns add pulsing spots, fire bands, spectral
+waves, and glowing orc runes to their voxel bodies.
 Voxel farm and forest animals—including pigs, cows, sheep, chickens, wolves,
 cats, rabbits, foxes, pandas, horses, turtles, and frogs—appear as harmless,
 randomized wildlife. Platform widths,
