@@ -2,6 +2,7 @@ import Platforms from './Platforms'
 import Sky from './Sky'
 import VoxelClouds from './VoxelClouds'
 import Rain from './Rain'
+import Castle from './Castle'
 import Coin from './Coin'
 import Enemy from './Enemy'
 import Player from './Player'
@@ -32,6 +33,7 @@ export default function Scene({
         colors={level.colors}
         theme={level.theme}
       />
+      <Castle platforms={level.platforms} theme={level.theme} />
       {level.coins.map((c, i) => (
         <Coin
           key={i}

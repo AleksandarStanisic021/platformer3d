@@ -10,6 +10,8 @@ The HUD sound toggle controls original synthesized arcade effects for jumps,
 coin pickups, hazards, and level completion. Audio starts after the first
 keyboard or sound-button interaction to comply with browser autoplay rules;
 procedural rain ambience also follows the storm cycle and sound toggle.
+Nearby voxel enemies make distinct quiet procedural sounds: squelches, fiery
+growls, and airy chimes.
 
 Collect every coin to advance through infinitely many platforming levels.
 The first five levels have handcrafted themes; subsequent levels use
@@ -41,6 +43,7 @@ animated rain during storms.
         Sky.jsx             day/night sky, sunrise, stars, and weather tint
         VoxelClouds.jsx     drifting block clouds
         Rain.jsx            instanced storm rain
+        Castle.jsx          climb-alongside voxel castle backdrop
         Platforms.jsx       renders the platforms
         Player.jsx          original sponge-like hero, movement, and camera follow
         Coin.jsx            spinning coin

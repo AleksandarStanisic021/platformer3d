@@ -1,17 +1,24 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { getEnemyPosition } from '../game/enemies'
+import { playEnemySound } from '../game/audio'
 
 export default function Enemy({ enemy }) {
   const group = useRef()
   const core = useRef()
   const orbit = useRef()
   const tail = useRef()
+  const nextSoundTime = useRef(0)
 
   useFrame((state, delta) => {
     if (!group.current) return
     const position = getEnemyPosition(enemy, state.clock.elapsedTime)
     group.current.position.set(...position)
+    const distanceToCamera = state.camera.position.distanceTo(group.current.position)
+    if (distanceToCamera < 13 && state.clock.elapsedTime >= nextSoundTime.current) {
+      playEnemySound(enemy.type)
+      nextSoundTime.current = state.clock.elapsedTime + 5.5 + (enemy.phase % 2.5)
+    }
     const pulse = 1 + Math.sin(state.clock.elapsedTime * 5 + enemy.phase) * 0.08
     if (enemy.type === 'slime') {
       group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8 + enemy.phase) * 0.14

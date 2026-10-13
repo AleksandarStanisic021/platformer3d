@@ -27,6 +27,21 @@ const SOUND_PATTERNS = {
   ],
 }
 
+const ENEMY_SOUND_NOTES = {
+  slime: [
+    { frequency: 190, endFrequency: 125, duration: 0.18, waveform: 'triangle' },
+    { frequency: 280, endFrequency: 220, duration: 0.12, delay: 0.1, waveform: 'sine' },
+  ],
+  blaze: [
+    { frequency: 420, endFrequency: 165, duration: 0.28, waveform: 'sawtooth' },
+    { frequency: 610, endFrequency: 350, duration: 0.16, delay: 0.08, waveform: 'triangle' },
+  ],
+  wisp: [
+    { frequency: 680, endFrequency: 910, duration: 0.32, waveform: 'sine' },
+    { frequency: 980, endFrequency: 740, duration: 0.24, delay: 0.12, waveform: 'sine' },
+  ],
+}
+
 export function setGameSoundsEnabled(enabled) {
   soundsEnabled = enabled
   syncRainAudio()
@@ -92,6 +107,16 @@ export function playGameSound(name) {
   const pattern = SOUND_PATTERNS[name]
   if (!pattern) return
 
+  playNotes(pattern, 0.075)
+}
+
+export function playEnemySound(type) {
+  if (!soundsEnabled || !audioContext || audioContext.state !== 'running') return
+  const pattern = ENEMY_SOUND_NOTES[type]
+  if (pattern) playNotes(pattern, 0.028)
+}
+
+function playNotes(pattern, peakVolume) {
   const now = audioContext.currentTime
   pattern.forEach((note) => {
     const start = now + (note.delay || 0)
@@ -106,7 +131,7 @@ export function playGameSound(name) {
       )
     }
     volume.gain.setValueAtTime(0.0001, start)
-    volume.gain.exponentialRampToValueAtTime(0.075, start + 0.012)
+    volume.gain.exponentialRampToValueAtTime(peakVolume, start + 0.012)
     volume.gain.exponentialRampToValueAtTime(0.0001, start + note.duration)
     oscillator.connect(volume)
     volume.connect(audioContext.destination)
