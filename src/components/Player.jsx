@@ -10,6 +10,7 @@ export default function Player({ onCoin }) {
   const pos = useRef([...START])
   const vel = useRef([0, 0, 0])
   const onGround = useRef(false)
+  const jumpWasHeld = useRef(false)
   const taken = useRef(new Set())
   const keys = useKeyboard()
 
@@ -17,8 +18,17 @@ export default function Player({ onCoin }) {
     const dt = Math.min(delta, 0.033)
     const p = pos.current
     const v = vel.current
+    const input = readInput(keys.current)
+    const jumpPressed = input.jump && !jumpWasHeld.current
+    jumpWasHeld.current = input.jump
 
-    onGround.current = stepPlayer(p, v, readInput(keys.current), onGround.current, dt)
+    onGround.current = stepPlayer(
+      p,
+      v,
+      { ...input, jump: jumpPressed },
+      onGround.current,
+      dt
+    )
 
     // Fell off the world -> back to start
     if (p[1] < FALL_LIMIT) {

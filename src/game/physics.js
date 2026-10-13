@@ -1,10 +1,12 @@
 import { HALF, GRAVITY, JUMP, SPEED, COIN_PICKUP_RADIUS } from './constants'
 import { PLATFORMS } from './level'
 
+const COLLISION_EPSILON = 1e-4
+
 const overlaps = (p, pl) =>
-  Math.abs(p[0] - pl.pos[0]) < HALF + pl.size[0] / 2 &&
-  Math.abs(p[1] - pl.pos[1]) < HALF + pl.size[1] / 2 &&
-  Math.abs(p[2] - pl.pos[2]) < HALF + pl.size[2] / 2
+  Math.abs(p[0] - pl.pos[0]) < HALF + pl.size[0] / 2 - COLLISION_EPSILON &&
+  Math.abs(p[1] - pl.pos[1]) < HALF + pl.size[1] / 2 - COLLISION_EPSILON &&
+  Math.abs(p[2] - pl.pos[2]) < HALF + pl.size[2] / 2 - COLLISION_EPSILON
 
 // Move along one axis (0=x, 1=y, 2=z) and push back out of any platform hit.
 // Returns true if a platform was hit.
