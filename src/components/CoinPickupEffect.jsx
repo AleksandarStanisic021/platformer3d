@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 
-const DURATION = 0.72
+const DURATION = 1.1
 const SPARK_COUNT = 8
 
 export default function CoinPickupEffect({ position }) {
@@ -26,9 +26,9 @@ export default function CoinPickupEffect({ position }) {
     const fade = 1 - progress
 
     if (ring.current) {
-      ring.current.scale.setScalar(0.35 + progress * 2.8)
+      ring.current.scale.setScalar(0.2 + progress * 2.5)
       ring.current.material.opacity = fade
-      ring.current.rotation.z += delta * 1.8
+      ring.current.rotation.y += delta * 1.8
     }
     if (orb.current) {
       orb.current.scale.setScalar(0.45 + fade * 0.8)
@@ -40,17 +40,17 @@ export default function CoinPickupEffect({ position }) {
       const distance = progress * 1.25
       spark.position.set(
         Math.cos(angle) * distance,
-        Math.sin(angle) * distance,
-        0
+        progress * (0.55 + (index % 3) * 0.25),
+        Math.sin(angle) * distance
       )
       spark.material.opacity = fade
-      spark.scale.setScalar(0.7 + fade * 0.5)
+      spark.scale.setScalar(0.4 + fade * 0.7)
     })
   })
 
   return (
     <group ref={group} position={position}>
-      <mesh ref={ring} rotation={[0, 0, 0]}>
+      <mesh ref={ring} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.55, 0.045, 8, 40]} />
         <meshBasicMaterial
           color="#fff18a"
