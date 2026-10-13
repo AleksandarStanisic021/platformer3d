@@ -1,19 +1,84 @@
-// 2D overlay on top of the canvas
-export default function Hud({ collected, total }) {
-  const done = collected === total
+const panelStyle = {
+  position: 'absolute',
+  top: 16,
+  left: 16,
+  color: '#fff',
+  textShadow: '0 1px 4px #000',
+}
+
+const buttonStyle = {
+  marginTop: 16,
+  padding: '10px 18px',
+  border: '1px solid rgba(255,255,255,0.55)',
+  borderRadius: 8,
+  background: '#18aeb5',
+  color: '#06212b',
+  font: 'inherit',
+  fontWeight: 700,
+  cursor: 'pointer',
+}
+
+export default function Hud({
+  collected,
+  total,
+  level,
+  levelCount,
+  phase,
+  status,
+  onRestart,
+}) {
   return (
-    <div style={{ position: 'absolute', top: 16, left: 16, color: '#fff', textShadow: '0 1px 4px #000' }}>
-      <div style={{ fontSize: 22, fontWeight: 700 }}>
-        Coins: {collected} / {total}
+    <>
+      <div style={panelStyle}>
+        <div style={{ fontSize: 22, fontWeight: 700 }}>
+          Level {level} / {levelCount} · Coins: {collected} / {total}
+        </div>
+        <div style={{ fontSize: 14, opacity: 0.85, marginTop: 4 }}>
+          Move: WASD or arrows. Jump: Space. Restart: R.
+        </div>
       </div>
-      <div style={{ fontSize: 14, opacity: 0.8, marginTop: 4 }}>
-        Move: WASD or arrows. Jump: Space.
-      </div>
-      {done && (
-        <div style={{ fontSize: 20, marginTop: 8, color: '#ffd23f' }}>
-          You collected every coin!
+
+      {status && phase === 'playing' && (
+        <div style={{
+          position: 'absolute',
+          top: 88,
+          left: 16,
+          color: '#fff2a6',
+          fontWeight: 700,
+          textShadow: '0 1px 5px #000',
+        }}>
+          {status}
         </div>
       )}
-    </div>
+
+      {(phase === 'transition' || phase === 'won') && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'grid',
+          placeItems: 'center',
+          background: 'rgba(8, 20, 38, 0.62)',
+          color: '#fff',
+          textAlign: 'center',
+          textShadow: '0 2px 12px #000',
+        }}>
+          <div>
+            <div style={{ fontSize: 38, fontWeight: 800 }}>
+              {phase === 'won' ? 'You beat all 5 levels!' : 'Level complete!'}
+            </div>
+            {phase === 'won' ? (
+              <>
+                <div style={{ marginTop: 8 }}>Great platforming!</div>
+                <button style={buttonStyle} onClick={onRestart}>
+                  Play again
+                </button>
+              </>
+            ) : (
+              <div style={{ marginTop: 8 }}>Next level loading...</div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
