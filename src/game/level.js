@@ -95,10 +95,38 @@ const LAYOUTS = [
   },
 ]
 
-const createLevel = (layout, movingPlatforms = layout.movingPlatforms) => {
-  const platforms = layout.platforms.map(([x, topY, z, width, depth]) => (
-    plat(x, topY, z, width, depth)
-  ))
+const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) => {
+  const platforms = layout.platforms.map(([x, topY, z, width, depth], index) => {
+    const widthScale = 0.84 + random() * 0.32
+    const depthScale = 0.84 + random() * 0.32
+    const minimum = index === 0 ? 6.5 : index === layout.platforms.length - 1 ? 4.8 : 3.2
+    const maximum = index === 0 ? 9 : index === layout.platforms.length - 1 ? 7 : 5
+    const platform = plat(
+      x,
+      topY,
+      z,
+      Math.min(maximum, Math.max(minimum, width * widthScale)),
+      Math.min(maximum, Math.max(minimum, depth * depthScale))
+    )
+    const halfWidth = platform.size[0] / 2
+    const halfDepth = platform.size[2] / 2
+    const corners = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+
+    for (let cornerIndex = corners.length - 1; cornerIndex > 0; cornerIndex -= 1) {
+      const swapIndex = Math.floor(random() * (cornerIndex + 1))
+      ;[corners[cornerIndex], corners[swapIndex]] = [corners[swapIndex], corners[cornerIndex]]
+    }
+
+    const floraCount = (halfWidth * halfDepth > 10 ? 2 : 1) + Math.floor(random() * 2)
+    platform.flora = corners.slice(0, floraCount).map(([signX, signZ]) => ({
+      x: signX * (Math.max(0.65, halfWidth - 1.25) + random() * Math.min(0.45, halfWidth * 0.12)),
+      z: signZ * (Math.max(0.65, halfDepth - 1.25) + random() * Math.min(0.45, halfDepth * 0.12)),
+      type: random() < 0.3 ? 'tree' : random() < 0.5 ? 'flower' : 'grass',
+      scale: 0.72 + random() * 0.48,
+      rotation: random() * Math.PI * 2,
+    }))
+    return platform
+  })
   movingPlatforms.forEach(({ index, ...motion }) => {
     platforms[index].motion = motion
   })
@@ -131,6 +159,7 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms) => {
   return {
     name: layout.name,
     theme: layout.theme,
+    seed: layout.seed,
     colors: layout.colors,
     surfaces: layout.surfaces,
     platforms,
@@ -138,8 +167,6 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms) => {
     enemies,
   }
 }
-
-export const LEVELS = LAYOUTS.map((layout) => createLevel(layout))
 
 const randomFrom = (seed) => {
   let state = seed >>> 0
@@ -151,6 +178,10 @@ const randomFrom = (seed) => {
     return ((value ^ (value >>> 14)) >>> 0) / 4294967296
   }
 }
+
+export const LEVELS = LAYOUTS.map((layout, index) => (
+  createLevel({ ...layout, seed: index }, layout.movingPlatforms, randomFrom((index + 1) * 7919))
+))
 
 const getRandomMovingPlatforms = (platformData, random) => {
   const candidateIndices = Array.from(
@@ -183,11 +214,13 @@ const getRandomMovingPlatforms = (platformData, random) => {
 
 export function getLevel(index) {
   if (index < LEVELS.length) {
-    const layout = LAYOUTS[index]
+    const layout = { ...LAYOUTS[index], seed: index }
     const random = randomFrom((index + 1) * 7919)
+    const movingPlatforms = getRandomMovingPlatforms(layout.platforms, random)
     return createLevel(
       layout,
-      getRandomMovingPlatforms(layout.platforms, random)
+      movingPlatforms,
+      random
     )
   }
 
@@ -220,7 +253,8 @@ export function getLevel(index) {
     )),
   }
 
-  return createLevel(layout, getRandomMovingPlatforms(platformData, random))
+  const movingPlatforms = getRandomMovingPlatforms(platformData, random)
+  return createLevel({ ...layout, seed: index }, movingPlatforms, random)
 }
 
 export const { platforms: PLATFORMS, coins: COINS } = LEVELS[0]

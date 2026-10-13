@@ -1,3 +1,5 @@
+import VoxelFlora from './VoxelFlora'
+
 const BIOME_STONE = [
   ['#526d79', '#7895a0', '#4ff0dc'],
   ['#554879', '#9a80b9', '#edc5ff'],
@@ -6,15 +8,26 @@ const BIOME_STONE = [
   ['#3c527c', '#798db4', '#f6a8ff'],
 ]
 const CASTLE_OFFSET = 14
+const randomFrom = (seed) => {
+  let state = seed >>> 0
+  return () => {
+    state += 0x6D2B79F5
+    let value = state
+    value = Math.imul(value ^ (value >>> 15), value | 1)
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61)
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296
+  }
+}
 
 const topOf = (platform) => platform.pos[1] + platform.size[1] / 2
 
-export default function Castle({ platforms, theme = 0 }) {
+export default function Castle({ platforms, theme = 0, seed = 0 }) {
   const [stone, trim, windowLight] = BIOME_STONE[theme % BIOME_STONE.length]
   if (platforms.length < 2) return null
 
   const averageX = platforms.reduce((sum, platform) => sum + platform.pos[0], 0) / platforms.length
   const side = averageX >= 0 ? -1 : 1
+  const random = randomFrom((seed + 1) * 104729)
 
   return (
     <group>
@@ -31,6 +44,23 @@ export default function Castle({ platforms, theme = 0 }) {
         const towerX = platform.pos[0] + side * CASTLE_OFFSET
         const towerZ = platform.pos[2]
         const towerBaseY = topOf(platform) + 2.8
+        const wallFlora = random() > 0.38
+        const wallPlant = {
+          x: centerX + side * 0.52,
+          y: wallY + 2.25,
+          z: centerZ + (random() - 0.5) * wallLength * 0.55,
+          type: random() < 0.36 ? 'tree' : random() < 0.5 ? 'flower' : 'grass',
+          scale: 0.65 + random() * 0.5,
+          rotation: random() * Math.PI * 2,
+        }
+        const towerPlant = {
+          x: (random() - 0.5) * 0.9,
+          y: 3.22,
+          z: (random() - 0.5) * 0.9,
+          type: random() < 0.58 ? 'tree' : random() < 0.5 ? 'flower' : 'grass',
+          scale: 0.62 + random() * 0.42,
+          rotation: random() * Math.PI * 2,
+        }
 
         return (
           <group key={index}>
@@ -47,6 +77,7 @@ export default function Castle({ platforms, theme = 0 }) {
               <boxGeometry args={[1.05, 0.34, wallLength]} />
               <meshStandardMaterial color={trim} roughness={0.82} />
             </mesh>
+            {wallFlora && <VoxelFlora plant={wallPlant} theme={theme} />}
 
             {[-1, 1].map((windowSide) => (
               <mesh
@@ -90,6 +121,7 @@ export default function Castle({ platforms, theme = 0 }) {
                   <boxGeometry args={[0.82, 0.44, 0.08]} />
                   <meshStandardMaterial color={windowLight} emissive={windowLight} emissiveIntensity={0.35} />
                 </mesh>
+                <VoxelFlora plant={towerPlant} theme={theme} />
               </group>
             )}
           </group>

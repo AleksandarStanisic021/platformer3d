@@ -33,7 +33,7 @@ export default function Scene({
         colors={level.colors}
         theme={level.theme}
       />
-      <Castle platforms={level.platforms} theme={level.theme} />
+      <Castle platforms={level.platforms} theme={level.theme} seed={level.seed} />
       {level.coins.map((c, i) => (
         <Coin
           key={i}

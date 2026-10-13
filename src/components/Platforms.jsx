@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { PLATFORMS as DEFAULT_PLATFORMS } from '../game/level'
 import { getPlatformPosition } from '../game/platforms'
+import VoxelFlora from './VoxelFlora'
 
 const SURFACE_IDS = { earth: 0, water: 1, wood: 2, stone: 3 }
 
@@ -189,6 +190,13 @@ export default function Platforms({
           }}
           customProgramCacheKey={() => 'platformer-environment-shader-v3'}
         />
+        {pl.flora?.map((plant, plantIndex) => (
+          <VoxelFlora
+            key={`${i}-${plantIndex}`}
+            plant={{ ...plant, y: pl.size[1] / 2 }}
+            theme={theme}
+          />
+        ))}
       </mesh>
     )
   })
