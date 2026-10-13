@@ -15,6 +15,7 @@ export default function Player({
   coins = DEFAULT_COINS,
   enemies = [],
   platforms = DEFAULT_PLATFORMS,
+  river = null,
 }) {
   const mesh = useRef()
   const pos = useRef([...START])
@@ -30,6 +31,12 @@ export default function Player({
     time: { value: 0 },
     pickupPulse: { value: 0 },
   }), [])
+  const riverPlatform = river
+    ? {
+      pos: [river.pos[0], river.waterLevel - 0.12, river.pos[2]],
+      size: [river.size[0], 0.24, river.size[1]],
+    }
+    : null
 
   useFrame((state, delta) => {
     if (!active) return
@@ -47,7 +54,8 @@ export default function Player({
       ...platform,
       pos: getPlatformPosition(platform, time),
     }))
-    if (platformPositions.current.length !== platforms.length) {
+    if (riverPlatform) activePlatforms.push(riverPlatform)
+    if (platformPositions.current.length !== activePlatforms.length) {
       platformPositions.current = activePlatforms.map((platform) => [...platform.pos])
     }
     if (onGround.current && groundPlatform.current !== -1) {
@@ -87,6 +95,11 @@ export default function Player({
         Math.abs(p[2] - platform.pos[2]) < HALF + platform.size[2] / 2
       ))
       : -1
+    if (groundPlatform.current >= platforms.length && riverPlatform) {
+      groundPlatform.current = -2
+      const flowAxis = river.flow.axis === 'x' ? 0 : 2
+      p[flowAxis] += river.flow.direction * river.flow.speed * dt
+    }
     platformPositions.current = activePlatforms.map((platform) => [...platform.pos])
 
     if (p[1] < FALL_LIMIT) {

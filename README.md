@@ -20,6 +20,9 @@ a flashy fire elemental, alongside slimes, blazes, wisps, tiny dragons, goo
 creatures, and zombies. Animated procedural shader patterns add pulsing spots,
 fire bands, spectral waves, dragon scales, goo bubbles, and zombie stitches to
 their voxel bodies.
+Procedural levels vary their route patterns and generate 9–14 platforms. A
+flowing river appears on about half of the levels; falling into it lets the
+player float downstream, and its current carries them along.
 Enemies, wildlife, plants, and castle structures cast detailed soft shadows
 onto platforms and nearby surfaces.
 Voxel farm and forest animals—including pigs, cows, sheep, chickens, wolves,
@@ -55,6 +58,7 @@ lightweight animated rain during storms.
         Sky.jsx             day/night sky, sunrise, stars, and weather tint
         VoxelClouds.jsx     drifting block clouds
         Rain.jsx            instanced storm rain
+        River.jsx             animated river surface and banks
         Castle.jsx          climb-alongside voxel castle backdrop
         Platforms.jsx       renders the platforms
         VoxelFlora.jsx      blocky trees, flowers, and grass

@@ -193,6 +193,9 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) =
       phase: index * 1.3 + random() * 2,
     }
   })
+  const river = layout.seed % 4 === 1 || layout.seed % 4 === 2
+    ? createRiver(platforms, random)
+    : null
 
   return {
     name: layout.name,
@@ -204,6 +207,31 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) =
     coins,
     enemies,
     animals,
+    river,
+  }
+}
+
+const createRiver = (platforms, random) => {
+  const minX = Math.min(...platforms.map((platform) => platform.pos[0] - platform.size[0] / 2))
+  const maxX = Math.max(...platforms.map((platform) => platform.pos[0] + platform.size[0] / 2))
+  const startZ = platforms[0].pos[2]
+  const endZ = platforms[platforms.length - 1].pos[2]
+  const zPadding = 12
+  const waterLevel = -1.6
+  const width = maxX - minX + 12
+  const length = Math.abs(endZ - startZ) + zPadding * 2
+  const centerX = (minX + maxX) / 2
+  const centerZ = (startZ + endZ) / 2
+
+  return {
+    pos: [centerX, waterLevel, centerZ],
+    size: [width, length],
+    waterLevel,
+    flow: {
+      axis: random() < 0.35 ? 'x' : 'z',
+      direction: random() < 0.5 ? -1 : 1,
+      speed: 1.3 + random() * 0.9,
+    },
   }
 }
 
@@ -265,30 +293,62 @@ export function getLevel(index) {
 
   const biome = LAYOUTS[index % LAYOUTS.length]
   const random = randomFrom((index + 1) * 7919)
+  const platformCount = 9 + Math.floor(random() * 6)
+  const pattern = Math.floor(random() * 4)
   const platformData = [[0, 0, 0, 8, 8]]
   let x = 0
   let topY = 0
   let z = 0
 
-  for (let platformIndex = 1; platformIndex < 8; platformIndex += 1) {
-    x += Math.round((random() * 2 - 1) * 2.4 * 2) / 2
-    x = Math.max(-8, Math.min(8, x))
-    z -= 5.2 + random() * 0.65
-    topY += 0.35 + random() * 0.28
-    const size = platformIndex === 7 ? 6 : 3.9 + random() * 0.3
-    platformData.push([x, topY, z, size, size])
+  for (let platformIndex = 1; platformIndex < platformCount; platformIndex += 1) {
+    const side = pattern === 0
+      ? (platformIndex % 2 ? 1 : -1)
+      : pattern === 1
+        ? (random() < 0.5 ? -1 : 1)
+        : pattern === 2
+          ? (Math.floor((platformIndex - 1) / 2) % 2 ? -1 : 1)
+          : Math.sign(Math.sin(platformIndex * 0.85)) || 1
+    const lateralStep = pattern === 3
+      ? Math.max(-2.8, Math.min(2.8, Math.sin(platformIndex * 0.85) * 5 - x))
+      : side * (1.3 + random() * 1.5)
+    x = Math.max(-8, Math.min(8, x + lateralStep))
+    z -= 3.4 + random() * 0.9
+    topY += random() < 0.18 ? -0.12 + random() * 0.25 : 0.18 + random() * 0.4
+    const isGoal = platformIndex === platformCount - 1
+    const width = isGoal ? 5.5 : 2.8 + random() * 2.2
+    const depth = isGoal ? 5.5 : 2.8 + random() * 2.2
+    platformData.push([x, topY, z, width, depth])
   }
+
+  const availableEnemyPlatforms = Array.from(
+    { length: platformCount - 2 },
+    (_, index) => index + 1
+  )
+  for (let index = availableEnemyPlatforms.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1))
+    ;[availableEnemyPlatforms[index], availableEnemyPlatforms[swapIndex]] = [
+      availableEnemyPlatforms[swapIndex],
+      availableEnemyPlatforms[index],
+    ]
+  }
+  const enemyCount = Math.min(3 + Math.floor(random() * 3), availableEnemyPlatforms.length)
+  const enemyPlatforms = availableEnemyPlatforms.slice(0, enemyCount)
+  const enemyChoices = ['fireElemental', 'wisp', 'blaze', 'dragon', 'goo', 'zombie', 'slime']
 
   const layout = {
     ...biome,
     name: `${biome.name} ${Math.floor(index / LAYOUTS.length) + 1}`,
     platforms: platformData,
     surfaces: platformData.map((_, platformIndex) => (
-      biome.surfaces[(platformIndex + index) % biome.surfaces.length]
+      platformIndex === 0
+        ? 'earth'
+        : platformIndex === platformData.length - 1
+          ? 'stone'
+          : biome.surfaces[Math.floor(random() * biome.surfaces.length)]
     )),
-    enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['fireElemental', 'wisp', 'blaze'].map((_, enemyIndex) => (
-      ['fireElemental', 'wisp', 'blaze', 'dragon', 'goo', 'zombie'][(enemyIndex + index) % 6]
+    enemyPlatforms,
+    enemyTypes: enemyPlatforms.map(() => (
+      enemyChoices[Math.floor(random() * enemyChoices.length)]
     )),
   }
 

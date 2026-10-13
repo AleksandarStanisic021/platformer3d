@@ -6,6 +6,7 @@ import Castle from './Castle'
 import Coin from './Coin'
 import Enemy from './Enemy'
 import VoxelAnimal from './VoxelAnimal'
+import River from './River'
 import Player from './Player'
 import CoinPickupEffect from './CoinPickupEffect'
 
@@ -49,6 +50,7 @@ export default function Scene({
         colors={level.colors}
         theme={level.theme}
       />
+      {level.river && <River river={level.river} />}
       <Castle platforms={level.platforms} theme={level.theme} seed={level.seed} />
       {level.coins.map((c, i) => (
         <Coin
@@ -75,6 +77,7 @@ export default function Scene({
         coins={level.coins}
         enemies={level.enemies}
         platforms={level.platforms}
+        river={level.river}
         onCoin={onCoin}
         onHazard={onHazard}
         onJump={onJump}
