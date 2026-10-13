@@ -1,4 +1,5 @@
 import Platforms from './Platforms'
+import Sky from './Sky'
 import Coin from './Coin'
 import Enemy from './Enemy'
 import Player from './Player'
@@ -16,7 +17,8 @@ export default function Scene({
   return (
     <>
       <color attach="background" args={['#1b2a41']} />
-      <fog attach="fog" args={['#1b2a41', 24, 68]} />
+      <fog attach="fog" args={['#1b2a41', 30, 82]} />
+      <Sky />
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 20, 10]} intensity={1.2} castShadow />
 
