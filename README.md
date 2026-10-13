@@ -7,9 +7,9 @@ Requires Node.js 18+ (https://nodejs.org).
 
 Controls: WASD / arrow keys to move, Space to jump, R to restart.
 
-Collect every coin to advance through all 5 similar platforming levels.
-Falling restarts the current level. Finish the last level to unlock the replay
-button.
+Collect every coin to advance through five differently themed platforming
+levels. Avoid the moving enemies; touching one or falling restarts the current
+level. Finish the last level to unlock the replay button.
 
 ## Structure
 
@@ -18,8 +18,9 @@ button.
       App.jsx               canvas + game state (collected coins)
       game/
         constants.js        speed, jump, gravity, camera settings
-        level.js            the five platform and coin layouts
+        level.js            themed platform, coin, and enemy layouts
         physics.js          collision and movement logic
+        enemies.js          enemy patrol and collision calculations
       hooks/
         useKeyboard.js      keyboard state and input mapping
       components/
@@ -29,3 +30,4 @@ button.
         Coin.jsx            spinning coin
         Hud.jsx             level progress, restart, and victory overlay
         CoinPickupEffect.jsx animated coin-collection burst
+        Enemy.jsx           glowing, patrolling platform enemy

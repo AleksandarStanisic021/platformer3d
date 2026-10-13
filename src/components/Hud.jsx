@@ -22,6 +22,7 @@ export default function Hud({
   collected,
   total,
   level,
+  levelName,
   levelCount,
   phase,
   status,
@@ -34,7 +35,10 @@ export default function Hud({
           Level {level} / {levelCount} · Coins: {collected} / {total}
         </div>
         <div style={{ fontSize: 14, opacity: 0.85, marginTop: 4 }}>
-          Move: WASD or arrows. Jump: Space. Restart: R.
+          {levelName} · Move: WASD/arrows · Jump: Space · Restart: R
+        </div>
+        <div style={{ fontSize: 13, opacity: 0.75, marginTop: 3 }}>
+          Avoid the glowing enemies.
         </div>
       </div>
 

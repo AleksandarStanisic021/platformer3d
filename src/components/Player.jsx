@@ -2,14 +2,16 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useKeyboard, readInput } from '../hooks/useKeyboard'
 import { stepPlayer, touchesCoin } from '../game/physics'
+import { getEnemyPosition, touchesEnemy } from '../game/enemies'
 import { COINS as DEFAULT_COINS, PLATFORMS as DEFAULT_PLATFORMS } from '../game/level'
 import { HALF, START, FALL_LIMIT, CAMERA_OFFSET, CAMERA_SMOOTHING } from '../game/constants'
 
 export default function Player({
   onCoin,
-  onFall,
+  onHazard,
   active = true,
   coins = DEFAULT_COINS,
+  enemies = [],
   platforms = DEFAULT_PLATFORMS,
 }) {
   const mesh = useRef()
@@ -52,13 +54,24 @@ export default function Player({
     if (p[1] < FALL_LIMIT) {
       if (!fallReported.current) {
         fallReported.current = true
-        onFall?.()
+        onHazard?.('fall')
       }
       p[0] = START[0]
       p[1] = START[1]
       p[2] = START[2]
       v[1] = 0
       onGround.current = false
+      return
+    }
+
+    const enemyHit = enemies.some((enemy) => (
+      touchesEnemy(p, getEnemyPosition(enemy, state.clock.elapsedTime))
+    ))
+    if (enemyHit) {
+      if (!fallReported.current) {
+        fallReported.current = true
+        onHazard?.('enemy')
+      }
       return
     }
 

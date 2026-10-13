@@ -79,15 +79,20 @@ export default function App() {
     }, 1000)
   }
 
-  const handleFall = () => {
+  const handleHazard = (reason) => {
     if (phaseRef.current !== 'playing') return
 
     window.clearTimeout(transitionTimeout.current)
+    window.clearTimeout(statusTimeout.current)
     collectedRef.current.clear()
     setCollected([])
     setPickupEffects([])
     setSessionId((previous) => previous + 1)
-    setStatus('You fell! Restarting this level...')
+    setStatus(
+      reason === 'enemy'
+        ? 'An enemy got you! Restarting this level...'
+        : 'You fell! Restarting this level...'
+    )
     statusTimeout.current = window.setTimeout(() => setStatus(''), 1800)
   }
 
@@ -101,13 +106,14 @@ export default function App() {
           pickupEffects={pickupEffects}
           active={phase === 'playing'}
           onCoin={handleCoin}
-          onFall={handleFall}
+          onHazard={handleHazard}
         />
       </Canvas>
       <Hud
         collected={collected.length}
         total={level.coins.length}
         level={levelIndex + 1}
+        levelName={level.name}
         levelCount={LEVELS.length}
         phase={phase}
         status={status}
