@@ -1,10 +1,11 @@
 import Platforms from './Platforms'
 import Coin from './Coin'
 import Player from './Player'
+import CoinPickupEffect from './CoinPickupEffect'
 import { COINS } from '../game/level'
 
 // Everything that lives inside the 3D canvas
-export default function Scene({ collected, onCoin }) {
+export default function Scene({ collected, onCoin, pickupEffects }) {
   return (
     <>
       <color attach="background" args={['#1b2a41']} />
@@ -15,6 +16,12 @@ export default function Scene({ collected, onCoin }) {
       <Platforms />
       {COINS.map((c, i) => (
         <Coin key={i} position={c} collected={collected.includes(i)} />
+      ))}
+      {pickupEffects.map((effect) => (
+        <CoinPickupEffect
+          key={effect.id}
+          position={effect.position}
+        />
       ))}
       <Player onCoin={onCoin} />
     </>
