@@ -44,6 +44,18 @@ const ENEMY_SOUND_NOTES = {
     { frequency: 105, endFrequency: 78, duration: 0.3, waveform: 'sawtooth' },
     { frequency: 145, endFrequency: 115, duration: 0.2, delay: 0.18, waveform: 'triangle' },
   ],
+  dragon: [
+    { frequency: 185, endFrequency: 92, duration: 0.3, waveform: 'sawtooth' },
+    { frequency: 430, endFrequency: 270, duration: 0.18, delay: 0.1, waveform: 'triangle' },
+  ],
+  goo: [
+    { frequency: 145, endFrequency: 82, duration: 0.24, waveform: 'sine' },
+    { frequency: 330, endFrequency: 205, duration: 0.16, delay: 0.08, waveform: 'triangle' },
+  ],
+  zombie: [
+    { frequency: 125, endFrequency: 68, duration: 0.34, waveform: 'sawtooth' },
+    { frequency: 98, endFrequency: 72, duration: 0.2, delay: 0.2, waveform: 'triangle' },
+  ],
 }
 
 export function setGameSoundsEnabled(enabled) {

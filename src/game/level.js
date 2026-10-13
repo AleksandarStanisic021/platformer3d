@@ -32,7 +32,7 @@ const LAYOUTS = [
       [-3, 5.5, -35, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['blaze', 'orc', 'slime'],
+    enemyTypes: ['blaze', 'dragon', 'goo'],
     surfaces: ['earth', 'water', 'wood', 'earth', 'water', 'wood', 'earth', 'stone'],
     movingPlatforms: [
       { index: 1, axis: 'x', range: 0.65, speed: 0.62, phase: 0.8 },
@@ -50,7 +50,7 @@ const LAYOUTS = [
       [4, 5.5, -34, 6, 6],
     ],
     enemyPlatforms: [2, 5, 6],
-    enemyTypes: ['orc', 'slime', 'blaze'],
+    enemyTypes: ['orc', 'zombie', 'blaze'],
     surfaces: ['earth', 'wood', 'water', 'wood', 'earth', 'water', 'wood', 'stone'],
     movingPlatforms: [
       { index: 1, axis: 'z', range: 0.65, speed: 0.7, phase: 0.4 },
@@ -68,7 +68,7 @@ const LAYOUTS = [
       [4, 5.5, -36, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['slime', 'orc', 'blaze'],
+    enemyTypes: ['slime', 'dragon', 'zombie'],
     surfaces: ['earth', 'water', 'wood', 'earth', 'water', 'wood', 'water', 'wood'],
     movingPlatforms: [
       { index: 1, axis: 'x', range: 0.65, speed: 0.6, phase: 0.6 },
@@ -86,7 +86,7 @@ const LAYOUTS = [
       [-12, 5.6, -35, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['wisp', 'orc', 'slime'],
+    enemyTypes: ['wisp', 'orc', 'goo'],
     surfaces: ['earth', 'wood', 'water', 'earth', 'wood', 'water', 'wood', 'stone'],
     movingPlatforms: [
       { index: 1, axis: 'z', range: 0.65, speed: 0.68, phase: 1 },
@@ -155,7 +155,10 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) =
     return {
       center: [
         platform.pos[0],
-        platform.pos[1] + (type === 'orc' ? 0.5 : 0.95),
+        platform.pos[1] + (
+          type === 'orc' || type === 'zombie' ? 0.5 :
+            type === 'dragon' || type === 'goo' ? 0.35 : 0.95
+        ),
         platform.pos[2],
       ],
       axis,
@@ -285,7 +288,7 @@ export function getLevel(index) {
     )),
     enemyPlatforms: [2, 4, 6],
     enemyTypes: ['orc', 'wisp', 'blaze'].map((_, enemyIndex) => (
-      ['orc', 'wisp', 'blaze'][(enemyIndex + index) % 3]
+      ['orc', 'wisp', 'blaze', 'dragon', 'goo', 'zombie'][(enemyIndex + index) % 6]
     )),
   }
 

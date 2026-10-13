@@ -31,6 +31,28 @@ const ENEMY_SHADER_EFFECTS = {
     enemyGlow = vec3(0.16, 1.0, 0.34) * runeBits * runePulse;
     diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.35, 1.0, 0.4), runeBits * runePulse * 0.62);
   `,
+  dragon: `
+    float scaleCells = floor(vEnemyPosition.y * 13.0 + vEnemyPosition.x * 4.0);
+    float scales = step(0.58, enemyHash(floor(vEnemyPosition.xz * 13.0) + scaleCells));
+    float ember = smoothstep(0.45, 0.95, sin(uEnemyTime * 5.0 + vEnemyPosition.y * 12.0));
+    enemyGlow = vec3(1.0, 0.16, 0.025) * ember * 0.72;
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.9, 0.38, 0.08), scales * 0.42);
+  `,
+  goo: `
+    float gooCells = enemyHash(floor(vEnemyPosition.xz * 9.0 + sin(uEnemyTime + vEnemyPosition.y) * 2.0));
+    float bubbles = smoothstep(0.7, 0.96, gooCells);
+    float gooWave = 0.5 + 0.5 * sin(uEnemyTime * 2.8 + vEnemyPosition.x * 8.0 + vEnemyPosition.z * 5.0);
+    enemyGlow = vec3(0.15, 1.0, 0.46) * (bubbles * 0.65 + gooWave * 0.18);
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.28, 1.0, 0.55), bubbles * 0.58);
+  `,
+  zombie: `
+    float stitchCell = floor(vEnemyPosition.xy * vec2(8.0, 10.0));
+    float stitches = step(0.88, enemyHash(stitchCell));
+    float rotPulse = 0.5 + 0.5 * sin(uEnemyTime * 2.4 + vEnemyPosition.y * 5.0);
+    enemyGlow = vec3(0.22, 0.86, 0.25) * stitches * 0.35;
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.55, 0.82, 0.34), stitches * 0.42);
+    diffuseColor.rgb *= 0.88 + rotPulse * 0.12;
+  `,
 }
 
 function applyEnemyShader(shader, uniforms, effect) {
@@ -75,6 +97,10 @@ export default function Enemy({ enemy }) {
   const core = useRef()
   const orbit = useRef()
   const tail = useRef()
+  const leftWing = useRef()
+  const rightWing = useRef()
+  const leftArm = useRef()
+  const rightArm = useRef()
   const nextSoundTime = useRef(0)
   const shaderUniforms = useMemo(() => ({ time: { value: 0 } }), [])
 
@@ -100,6 +126,19 @@ export default function Enemy({ enemy }) {
       group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6 + enemy.phase) * 0.28
       core.current.scale.setScalar(pulse)
       tail.current.rotation.z = Math.sin(state.clock.elapsedTime * 2.5 + enemy.phase) * 0.12
+    } else if (enemy.type === 'dragon') {
+      group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.75 + enemy.phase) * 0.2
+      leftWing.current.rotation.z = Math.sin(state.clock.elapsedTime * 8 + enemy.phase) * 0.65
+      rightWing.current.rotation.z = -leftWing.current.rotation.z
+      tail.current.rotation.y = Math.sin(state.clock.elapsedTime * 2.2 + enemy.phase) * 0.25
+      core.current.scale.y = 1 + (pulse - 1) * 0.4
+    } else if (enemy.type === 'goo') {
+      core.current.scale.set(1 + (pulse - 1) * 1.7, 1 - (pulse - 1) * 1.25, 1 + (pulse - 1) * 1.7)
+      group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.7 + enemy.phase) * 0.16
+    } else if (enemy.type === 'zombie') {
+      group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8 + enemy.phase) * 0.12
+      leftArm.current.rotation.x = Math.sin(state.clock.elapsedTime * 2.2 + enemy.phase) * 0.16
+      rightArm.current.rotation.x = -leftArm.current.rotation.x
     } else {
       group.current.rotation.y = Math.sin(state.clock.elapsedTime * 1.3 + enemy.phase) * 0.32
       core.current.scale.set(1, 1 + (pulse - 1) * 0.35, 1)
@@ -107,7 +146,7 @@ export default function Enemy({ enemy }) {
   })
 
   return (
-    <group ref={group}>
+    <group ref={group} scale={enemy.type === 'orc' ? 0.7 : 1}>
       {enemy.type === 'slime' ? (
         <>
           <mesh ref={core} castShadow>
@@ -229,7 +268,7 @@ export default function Enemy({ enemy }) {
           </mesh>
           <pointLight color="#69aaff" intensity={0.8} distance={2.6} />
         </>
-      ) : (
+      ) : enemy.type === 'orc' ? (
         <>
           <mesh position={[0, 0.32, 0]} castShadow>
             <boxGeometry args={[0.72, 0.92, 0.48]} />
@@ -297,6 +336,156 @@ export default function Enemy({ enemy }) {
           <mesh position={[0.56, 1.31, 0.03]} rotation={[0, 0, -0.2]} castShadow>
             <boxGeometry args={[0.18, 0.13, 0.18]} />
             <meshStandardMaterial color="#c6cbd0" metalness={0.4} roughness={0.5} />
+          </mesh>
+        </>
+      ) : enemy.type === 'dragon' ? (
+        <>
+          <mesh ref={core} position={[0, 0.48, 0]} castShadow>
+            <boxGeometry args={[0.52, 0.43, 0.84]} />
+            <meshStandardMaterial
+              color="#668a35"
+              roughness={0.78}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
+          </mesh>
+          <mesh position={[0, 0.66, 0.37]} castShadow>
+            <boxGeometry args={[0.36, 0.34, 0.38]} />
+            <meshStandardMaterial
+              color="#86a94a"
+              roughness={0.78}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
+          </mesh>
+          <mesh position={[0, 0.55, 0.61]}>
+            <boxGeometry args={[0.26, 0.13, 0.16]} />
+            <meshStandardMaterial color="#d67537" emissive="#7d2810" emissiveIntensity={0.55} />
+          </mesh>
+          {[-1, 1].map((side) => (
+            <group key={side}>
+              <mesh position={[side * 0.1, 0.72, 0.51]}>
+                <boxGeometry args={[0.065, 0.065, 0.035]} />
+                <meshBasicMaterial color="#ffed9a" toneMapped={false} />
+              </mesh>
+              <mesh position={[side * 0.2, 0.91, 0.27]} rotation={[0, 0, side * 0.32]} castShadow>
+                <boxGeometry args={[0.1, 0.22, 0.1]} />
+                <meshStandardMaterial color="#d6c17b" />
+              </mesh>
+              <mesh position={[side * 0.2, 0.24, 0.2]} castShadow>
+                <boxGeometry args={[0.16, 0.3, 0.18]} />
+                <meshStandardMaterial color="#4c672f" />
+              </mesh>
+              <mesh ref={side === -1 ? leftWing : rightWing} position={[side * 0.4, 0.56, -0.05]} castShadow>
+                <boxGeometry args={[0.52, 0.09, 0.56]} />
+                <meshStandardMaterial
+                  color="#a34836"
+                  emissive="#4b140d"
+                  emissiveIntensity={0.28}
+                  roughness={0.8}
+                  onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+                  customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+                />
+              </mesh>
+              <mesh position={[side * 0.52, 0.68, -0.08]} rotation={[0, 0, side * 0.35]}>
+                <boxGeometry args={[0.32, 0.06, 0.08]} />
+                <meshStandardMaterial color="#e5a45b" />
+              </mesh>
+            </group>
+          ))}
+          <mesh ref={tail} position={[0, 0.43, -0.55]} castShadow>
+            <boxGeometry args={[0.18, 0.2, 0.44]} />
+            <meshStandardMaterial color="#587c32" roughness={0.8} />
+          </mesh>
+          <mesh position={[0, 0.52, -0.79]} rotation={[0.25, 0, 0]} castShadow>
+            <boxGeometry args={[0.24, 0.2, 0.2]} />
+            <meshStandardMaterial color="#d97835" emissive="#a93612" emissiveIntensity={0.72} />
+          </mesh>
+          <pointLight color="#ff6e2c" intensity={0.38} distance={1.8} />
+        </>
+      ) : enemy.type === 'goo' ? (
+        <>
+          <mesh position={[0, 0.08, 0]} castShadow>
+            <boxGeometry args={[0.96, 0.16, 0.86]} />
+            <meshStandardMaterial color="#267c45" roughness={0.32} metalness={0.06} />
+          </mesh>
+          <mesh ref={core} position={[0, 0.42, 0]} castShadow>
+            <boxGeometry args={[0.76, 0.58, 0.72]} />
+            <meshStandardMaterial
+              color="#42bd66"
+              emissive="#11682d"
+              emissiveIntensity={0.42}
+              roughness={0.28}
+              metalness={0.04}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
+          </mesh>
+          {[-1, 1].map((side) => (
+            <mesh key={side} position={[side * 0.18, 0.49, 0.37]}>
+              <boxGeometry args={[0.09, 0.12, 0.035]} />
+              <meshBasicMaterial color="#efffc1" toneMapped={false} />
+            </mesh>
+          ))}
+          <mesh position={[0.35, 0.75, -0.12]} castShadow>
+            <boxGeometry args={[0.23, 0.25, 0.23]} />
+            <meshStandardMaterial color="#78ed84" emissive="#32a64f" emissiveIntensity={0.28} />
+          </mesh>
+          <mesh position={[-0.33, 0.64, -0.22]} castShadow>
+            <boxGeometry args={[0.17, 0.2, 0.17]} />
+            <meshStandardMaterial color="#a0f58c" emissive="#32a64f" emissiveIntensity={0.28} />
+          </mesh>
+          <pointLight color="#50ff8c" intensity={0.45} distance={2} />
+        </>
+      ) : (
+        <>
+          <mesh position={[0, 0.48, 0]} castShadow>
+            <boxGeometry args={[0.54, 0.76, 0.38]} />
+            <meshStandardMaterial
+              color="#537b46"
+              roughness={0.95}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
+          </mesh>
+          <mesh position={[0, 1.02, 0.05]} castShadow>
+            <boxGeometry args={[0.58, 0.5, 0.48]} />
+            <meshStandardMaterial
+              color="#72a455"
+              roughness={0.94}
+              onBeforeCompile={(shader) => applyEnemyShader(shader, shaderUniforms, enemy.type)}
+              customProgramCacheKey={() => `enemy-shader-${enemy.type}-v1`}
+            />
+          </mesh>
+          <mesh position={[0, 0.9, 0.3]}>
+            <boxGeometry args={[0.24, 0.12, 0.035]} />
+            <meshStandardMaterial color="#392d2a" />
+          </mesh>
+          {[-1, 1].map((side) => (
+            <group key={side} ref={side === -1 ? leftArm : rightArm} position={[side * 0.38, 0.64, 0]}>
+              <mesh position={[0, 0, 0]} castShadow>
+                <boxGeometry args={[0.19, 0.62, 0.2]} />
+                <meshStandardMaterial color="#64894b" roughness={0.95} />
+              </mesh>
+              <mesh position={[0, -0.37, 0.1]} castShadow>
+                <boxGeometry args={[0.22, 0.19, 0.22]} />
+                <meshStandardMaterial color="#8c9b62" roughness={0.95} />
+              </mesh>
+            </group>
+          ))}
+          {[-1, 1].map((side) => (
+            <mesh key={side} position={[side * 0.16, 0.13, 0]} castShadow>
+              <boxGeometry args={[0.2, 0.32, 0.22]} />
+              <meshStandardMaterial color="#394a45" roughness={0.96} />
+            </mesh>
+          ))}
+          <mesh position={[-0.14, 1.08, 0.26]}>
+            <boxGeometry args={[0.08, 0.09, 0.04]} />
+            <meshBasicMaterial color="#dbff8c" toneMapped={false} />
+          </mesh>
+          <mesh position={[0.14, 1.08, 0.26]}>
+            <boxGeometry args={[0.08, 0.09, 0.04]} />
+            <meshBasicMaterial color="#dbff8c" toneMapped={false} />
           </mesh>
         </>
       )}

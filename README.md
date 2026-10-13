@@ -16,9 +16,10 @@ growls, and airy chimes.
 Collect every coin to advance through infinitely many platforming levels.
 The first five levels have handcrafted themes; subsequent levels use
 deterministic random layouts and rotate through the biomes. Each biome features
-a block-built orc enemy, alongside the existing slime, blaze, and wisp foes.
-Animated procedural shader patterns add pulsing spots, fire bands, spectral
-waves, and glowing orc runes to their voxel bodies.
+a block-built orc enemy, alongside slimes, blazes, wisps, tiny dragons, goo
+creatures, and zombies. Animated procedural shader patterns add pulsing spots,
+fire bands, spectral waves, dragon scales, goo bubbles, zombie stitches, and
+glowing orc runes to their voxel bodies.
 Enemies, wildlife, plants, and castle structures cast detailed soft shadows
 onto platforms and nearby surfaces.
 Voxel farm and forest animals—including pigs, cows, sheep, chickens, wolves,
@@ -61,5 +62,5 @@ animated rain during storms.
         Coin.jsx            spinning coin
         Hud.jsx             level progress, restart, and victory overlay
         CoinPickupEffect.jsx animated coin-collection burst
-        Enemy.jsx           patrolling slime, blaze, and wisp hazards
+        Enemy.jsx           patrolling voxel monsters with animated shader effects
         VoxelAnimal.jsx     harmless block-built farm and forest wildlife
