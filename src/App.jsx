@@ -4,6 +4,7 @@ import Scene from './components/Scene'
 import Hud from './components/Hud'
 import { LEVELS } from './game/level'
 import { CAMERA_OFFSET } from './game/constants'
+import { playGameSound, setGameSoundsEnabled, unlockGameAudio } from './game/audio'
 
 export default function App() {
   const [levelIndex, setLevelIndex] = useState(0)
@@ -12,8 +13,10 @@ export default function App() {
   const [sessionId, setSessionId] = useState(0)
   const [phase, setPhase] = useState('playing')
   const [status, setStatus] = useState('')
+  const [soundEnabled, setSoundEnabled] = useState(true)
   const collectedRef = useRef(new Set())
   const phaseRef = useRef('playing')
+  const soundEnabledRef = useRef(true)
   const nextEffectId = useRef(0)
   const transitionTimeout = useRef()
   const statusTimeout = useRef()
@@ -42,6 +45,7 @@ export default function App() {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (event.isTrusted && soundEnabledRef.current) unlockGameAudio()
       if (event.code === 'KeyR' && !event.repeat) restartGame()
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -54,6 +58,7 @@ export default function App() {
   const handleCoin = (index) => {
     if (phaseRef.current !== 'playing' || collectedRef.current.has(index)) return
 
+    playGameSound('coin')
     collectedRef.current.add(index)
     setCollected(Array.from(collectedRef.current))
     setPickupEffects((previous) => [
@@ -63,6 +68,7 @@ export default function App() {
 
     if (collectedRef.current.size !== level.coins.length) return
 
+    playGameSound('level')
     updatePhase('transition')
     transitionTimeout.current = window.setTimeout(() => {
       if (levelIndex === LEVELS.length - 1) {
@@ -82,6 +88,7 @@ export default function App() {
   const handleHazard = (reason) => {
     if (phaseRef.current !== 'playing') return
 
+    playGameSound(reason === 'enemy' ? 'hit' : 'fall')
     window.clearTimeout(transitionTimeout.current)
     window.clearTimeout(statusTimeout.current)
     collectedRef.current.clear()
@@ -96,6 +103,14 @@ export default function App() {
     statusTimeout.current = window.setTimeout(() => setStatus(''), 1800)
   }
 
+  const toggleSound = () => {
+    const enabled = !soundEnabledRef.current
+    soundEnabledRef.current = enabled
+    setSoundEnabled(enabled)
+    setGameSoundsEnabled(enabled)
+    if (enabled) unlockGameAudio()
+  }
+
   return (
     <>
       <Canvas shadows camera={{ position: CAMERA_OFFSET, fov: 60 }}>
@@ -107,6 +122,7 @@ export default function App() {
           active={phase === 'playing'}
           onCoin={handleCoin}
           onHazard={handleHazard}
+          onJump={() => playGameSound('jump')}
         />
       </Canvas>
       <Hud
@@ -118,6 +134,8 @@ export default function App() {
         phase={phase}
         status={status}
         onRestart={restartGame}
+        soundEnabled={soundEnabled}
+        onToggleSound={toggleSound}
       />
     </>
   )

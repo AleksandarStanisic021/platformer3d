@@ -1,5 +1,6 @@
 import Platforms from './Platforms'
 import Sky from './Sky'
+import VoxelClouds from './VoxelClouds'
 import Coin from './Coin'
 import Enemy from './Enemy'
 import Player from './Player'
@@ -19,6 +20,7 @@ export default function Scene({
       <color attach="background" args={['#1b2a41']} />
       <fog attach="fog" args={['#1b2a41', 30, 82]} />
       <Sky />
+      <VoxelClouds />
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 20, 10]} intensity={1.2} castShadow />
 

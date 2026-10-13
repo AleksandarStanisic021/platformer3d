@@ -9,6 +9,7 @@ import { HALF, START, FALL_LIMIT, CAMERA_OFFSET, CAMERA_SMOOTHING } from '../gam
 export default function Player({
   onCoin,
   onHazard,
+  onJump,
   active = true,
   coins = DEFAULT_COINS,
   enemies = [],
@@ -42,6 +43,7 @@ export default function Player({
     const jumpPressed = input.jump && !jumpWasHeld.current
     jumpWasHeld.current = input.jump
 
+    if (jumpPressed && onGround.current) onJump?.()
     onGround.current = stepPlayer(
       p,
       v,

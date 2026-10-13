@@ -14,6 +14,7 @@ const LAYOUTS = [
       [-7, 5.5, -27, 4, 4], [-12, 6.5, -23, 6, 6],
     ],
     enemyPlatforms: [2, 5],
+    enemyTypes: ['slime', 'wisp'],
   },
   {
     name: 'Violet Switchback',
@@ -26,6 +27,7 @@ const LAYOUTS = [
       [-3, 5.5, -35, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
+    enemyTypes: ['blaze', 'wisp', 'slime'],
   },
   {
     name: 'Magma Steps',
@@ -38,6 +40,7 @@ const LAYOUTS = [
       [4, 5.5, -34, 6, 6],
     ],
     enemyPlatforms: [2, 5, 6],
+    enemyTypes: ['blaze', 'slime', 'blaze'],
   },
   {
     name: 'Jade Circuit',
@@ -50,6 +53,7 @@ const LAYOUTS = [
       [4, 5.5, -36, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
+    enemyTypes: ['slime', 'wisp', 'blaze'],
   },
   {
     name: 'Aurora Spire',
@@ -62,6 +66,7 @@ const LAYOUTS = [
       [-12, 5.6, -35, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
+    enemyTypes: ['wisp', 'blaze', 'slime'],
   },
 ]
 
@@ -88,6 +93,7 @@ export const LEVELS = LAYOUTS.map((layout) => {
       range,
       speed: 1.1 + index * 0.18,
       phase: index * 1.7,
+      type: layout.enemyTypes[index],
     }
   })
 

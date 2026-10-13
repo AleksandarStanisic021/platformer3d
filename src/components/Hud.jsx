@@ -18,6 +18,20 @@ const buttonStyle = {
   cursor: 'pointer',
 }
 
+const soundButtonStyle = {
+  position: 'absolute',
+  top: 16,
+  right: 16,
+  padding: '8px 12px',
+  border: '1px solid rgba(255,255,255,0.55)',
+  borderRadius: 8,
+  background: 'rgba(8, 20, 38, 0.72)',
+  color: '#fff',
+  font: 'inherit',
+  fontWeight: 700,
+  cursor: 'pointer',
+}
+
 export default function Hud({
   collected,
   total,
@@ -27,9 +41,14 @@ export default function Hud({
   phase,
   status,
   onRestart,
+  soundEnabled,
+  onToggleSound,
 }) {
   return (
     <>
+      <button style={soundButtonStyle} onClick={onToggleSound}>
+        Sound: {soundEnabled ? 'On' : 'Off'}
+      </button>
       <div style={panelStyle}>
         <div style={{ fontSize: 22, fontWeight: 700 }}>
           Level {level} / {levelCount} · Coins: {collected} / {total}
