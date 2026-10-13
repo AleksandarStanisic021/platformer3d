@@ -5,6 +5,7 @@ import Rain from './Rain'
 import Castle from './Castle'
 import Coin from './Coin'
 import Enemy from './Enemy'
+import VoxelAnimal from './VoxelAnimal'
 import Player from './Player'
 import CoinPickupEffect from './CoinPickupEffect'
 
@@ -44,6 +45,9 @@ export default function Scene({
       ))}
       {level.enemies.map((enemy, i) => (
         <Enemy key={i} enemy={enemy} />
+      ))}
+      {level.animals.map((animal, i) => (
+        <VoxelAnimal key={`${animal.type}-${i}`} animal={animal} />
       ))}
       {pickupEffects.map((effect) => (
         <CoinPickupEffect

@@ -15,7 +15,11 @@ growls, and airy chimes.
 
 Collect every coin to advance through infinitely many platforming levels.
 The first five levels have handcrafted themes; subsequent levels use
-deterministic random layouts and rotate through the biomes. Platform widths,
+deterministic random layouts and rotate through the biomes. Each biome features
+a block-built orc enemy, alongside the existing slime, blaze, and wisp foes.
+Voxel farm and forest animals—including pigs, cows, sheep, chickens, wolves,
+cats, rabbits, foxes, pandas, horses, turtles, and frogs—appear as harmless,
+randomized wildlife. Platform widths,
 depths, and voxel trees, grass, and flowers are randomized per level; the castle
 also grows a randomized mix of blocky plants. These choices stay fixed when the
 same level is restarted. Avoid the moving enemies; touching one or falling
@@ -54,3 +58,4 @@ animated rain during storms.
         Hud.jsx             level progress, restart, and victory overlay
         CoinPickupEffect.jsx animated coin-collection burst
         Enemy.jsx           patrolling slime, blaze, and wisp hazards
+        VoxelAnimal.jsx     harmless block-built farm and forest wildlife

@@ -14,7 +14,7 @@ const LAYOUTS = [
       [-7, 5.5, -27, 4, 4], [-12, 6.5, -23, 6, 6],
     ],
     enemyPlatforms: [2, 5],
-    enemyTypes: ['slime', 'wisp'],
+    enemyTypes: ['slime', 'orc'],
     surfaces: ['earth', 'wood', 'water', 'earth', 'wood', 'water', 'stone', 'wood'],
     movingPlatforms: [
       { index: 3, axis: 'x', range: 0.8, speed: 0.8, phase: 0 },
@@ -32,7 +32,7 @@ const LAYOUTS = [
       [-3, 5.5, -35, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['blaze', 'wisp', 'slime'],
+    enemyTypes: ['blaze', 'orc', 'slime'],
     surfaces: ['earth', 'water', 'wood', 'earth', 'water', 'wood', 'earth', 'stone'],
     movingPlatforms: [
       { index: 1, axis: 'x', range: 0.65, speed: 0.62, phase: 0.8 },
@@ -50,7 +50,7 @@ const LAYOUTS = [
       [4, 5.5, -34, 6, 6],
     ],
     enemyPlatforms: [2, 5, 6],
-    enemyTypes: ['blaze', 'slime', 'blaze'],
+    enemyTypes: ['orc', 'slime', 'blaze'],
     surfaces: ['earth', 'wood', 'water', 'wood', 'earth', 'water', 'wood', 'stone'],
     movingPlatforms: [
       { index: 1, axis: 'z', range: 0.65, speed: 0.7, phase: 0.4 },
@@ -68,7 +68,7 @@ const LAYOUTS = [
       [4, 5.5, -36, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['slime', 'wisp', 'blaze'],
+    enemyTypes: ['slime', 'orc', 'blaze'],
     surfaces: ['earth', 'water', 'wood', 'earth', 'water', 'wood', 'water', 'wood'],
     movingPlatforms: [
       { index: 1, axis: 'x', range: 0.65, speed: 0.6, phase: 0.6 },
@@ -86,13 +86,18 @@ const LAYOUTS = [
       [-12, 5.6, -35, 6, 6],
     ],
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['wisp', 'blaze', 'slime'],
+    enemyTypes: ['wisp', 'orc', 'slime'],
     surfaces: ['earth', 'wood', 'water', 'earth', 'wood', 'water', 'wood', 'stone'],
     movingPlatforms: [
       { index: 1, axis: 'z', range: 0.65, speed: 0.68, phase: 1 },
       { index: 5, axis: 'x', range: 0.7, speed: 0.64, phase: 2.2 },
     ],
   },
+]
+
+const ANIMAL_TYPES = [
+  'pig', 'cow', 'sheep', 'chicken', 'wolf', 'cat',
+  'rabbit', 'fox', 'panda', 'horse', 'turtle', 'frog',
 ]
 
 const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) => {
@@ -140,6 +145,7 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) =
   ])
   const enemies = layout.enemyPlatforms.map((platformIndex, index) => {
     const platform = platforms[platformIndex]
+    const type = layout.enemyTypes[index]
     const axis = index % 2 === 0 ? 'x' : 'z'
     const range = Math.max(
       0.55,
@@ -147,12 +153,41 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) =
     )
 
     return {
-      center: [platform.pos[0], platform.pos[1] + 0.95, platform.pos[2]],
+      center: [
+        platform.pos[0],
+        platform.pos[1] + (type === 'orc' ? 0.5 : 0.95),
+        platform.pos[2],
+      ],
       axis,
       range,
       speed: 1.1 + index * 0.18,
       phase: index * 1.7,
-      type: layout.enemyTypes[index],
+      type,
+    }
+  })
+  const occupiedPlatforms = new Set(layout.enemyPlatforms)
+  const animalPlatforms = platforms
+    .map((platform, index) => ({ platform, index }))
+    .filter(({ index, platform }) => (
+      !occupiedPlatforms.has(index) &&
+      (platform.size[0] >= 5.5 || platform.size[2] >= 5.5)
+    ))
+  const animals = animalPlatforms.slice(0, 2).map(({ platform, index }) => {
+    const type = ANIMAL_TYPES[Math.floor(random() * ANIMAL_TYPES.length)]
+    const halfWidth = platform.size[0] / 2
+    const halfDepth = platform.size[2] / 2
+    const cornerX = random() < 0.5 ? -1 : 1
+    const cornerZ = random() < 0.5 ? -1 : 1
+
+    return {
+      type,
+      center: [
+        platform.pos[0] + cornerX * Math.max(0.65, halfWidth - 1),
+        platform.pos[1] + platform.size[1] / 2,
+        platform.pos[2] + cornerZ * Math.max(0.65, halfDepth - 1),
+      ],
+      scale: 0.58 + random() * 0.16,
+      phase: index * 1.3 + random() * 2,
     }
   })
 
@@ -165,6 +200,7 @@ const createLevel = (layout, movingPlatforms = layout.movingPlatforms, random) =
     platforms,
     coins,
     enemies,
+    animals,
   }
 }
 
@@ -248,8 +284,8 @@ export function getLevel(index) {
       biome.surfaces[(platformIndex + index) % biome.surfaces.length]
     )),
     enemyPlatforms: [2, 4, 6],
-    enemyTypes: ['slime', 'wisp', 'blaze'].map((_, enemyIndex) => (
-      ['slime', 'wisp', 'blaze'][(enemyIndex + index) % 3]
+    enemyTypes: ['orc', 'wisp', 'blaze'].map((_, enemyIndex) => (
+      ['orc', 'wisp', 'blaze'][(enemyIndex + index) % 3]
     )),
   }
 

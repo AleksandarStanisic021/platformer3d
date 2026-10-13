@@ -27,10 +27,13 @@ export default function Enemy({ enemy }) {
       group.current.rotation.y += delta * 0.5
       core.current.scale.setScalar(pulse)
       orbit.current.rotation.y += delta * 1.6
-    } else {
+    } else if (enemy.type === 'wisp') {
       group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6 + enemy.phase) * 0.28
       core.current.scale.setScalar(pulse)
       tail.current.rotation.z = Math.sin(state.clock.elapsedTime * 2.5 + enemy.phase) * 0.12
+    } else {
+      group.current.rotation.y = Math.sin(state.clock.elapsedTime * 1.3 + enemy.phase) * 0.32
+      core.current.scale.set(1, 1 + (pulse - 1) * 0.35, 1)
     }
   })
 
@@ -106,7 +109,7 @@ export default function Enemy({ enemy }) {
           </group>
           <pointLight color="#ff6b20" intensity={1.1} distance={2.8} />
         </>
-      ) : (
+      ) : enemy.type === 'wisp' ? (
         <>
           <mesh ref={core} position={[0, 0.12, 0]} castShadow>
             <boxGeometry args={[0.62, 0.55, 0.55]} />
@@ -142,6 +145,61 @@ export default function Enemy({ enemy }) {
             <meshStandardMaterial color="#9bc4e8" emissive="#365aab" emissiveIntensity={0.45} />
           </mesh>
           <pointLight color="#69aaff" intensity={0.8} distance={2.6} />
+        </>
+      ) : (
+        <>
+          <mesh position={[0, 0.32, 0]} castShadow>
+            <boxGeometry args={[0.72, 0.92, 0.48]} />
+            <meshStandardMaterial color="#386f3c" roughness={0.88} />
+          </mesh>
+          <mesh ref={core} position={[0, 1.02, 0.02]} castShadow>
+            <boxGeometry args={[0.78, 0.72, 0.62]} />
+            <meshStandardMaterial color="#57934c" roughness={0.88} />
+          </mesh>
+          <mesh position={[0, 0.34, 0.27]} castShadow>
+            <boxGeometry args={[0.82, 0.42, 0.16]} />
+            <meshStandardMaterial color="#4f3828" roughness={0.98} />
+          </mesh>
+          <mesh position={[0, 0.32, 0.36]} castShadow>
+            <boxGeometry args={[0.45, 0.16, 0.06]} />
+            <meshStandardMaterial color="#9d6434" roughness={0.9} />
+          </mesh>
+          {[-1, 1].map((side) => (
+            <group key={side}>
+              <mesh position={[side * 0.53, 0.46, 0.02]} rotation={[0, 0, side * 0.12]} castShadow>
+                <boxGeometry args={[0.24, 0.82, 0.28]} />
+                <meshStandardMaterial color="#4d8545" roughness={0.9} />
+              </mesh>
+              <mesh position={[side * 0.18, 1.1, 0.34]} castShadow>
+                <boxGeometry args={[0.12, 0.13, 0.07]} />
+                <meshBasicMaterial color="#f4cf63" toneMapped={false} />
+              </mesh>
+              <mesh position={[side * 0.23, 0.82, 0.35]} rotation={[0, 0, side * 0.22]} castShadow>
+                <boxGeometry args={[0.18, 0.32, 0.2]} />
+                <meshStandardMaterial color="#d7c8aa" roughness={0.8} />
+              </mesh>
+              <mesh position={[side * 0.23, 0.64, 0.37]} rotation={[0, 0, side * 0.22]} castShadow>
+                <boxGeometry args={[0.13, 0.16, 0.15]} />
+                <meshStandardMaterial color="#d7c8aa" roughness={0.8} />
+              </mesh>
+            </group>
+          ))}
+          <mesh position={[0, 0.12, 0]} castShadow>
+            <boxGeometry args={[0.84, 0.22, 0.54]} />
+            <meshStandardMaterial color="#403c38" roughness={0.95} />
+          </mesh>
+          <mesh position={[0.56, 0.68, 0.03]} rotation={[0, 0, -0.2]} castShadow>
+            <boxGeometry args={[0.2, 0.76, 0.2]} />
+            <meshStandardMaterial color="#71502d" roughness={0.9} />
+          </mesh>
+          <mesh position={[0.56, 1.13, 0.03]} rotation={[0, 0, -0.2]} castShadow>
+            <boxGeometry args={[0.28, 0.3, 0.28]} />
+            <meshStandardMaterial color="#b4bac0" metalness={0.45} roughness={0.55} />
+          </mesh>
+          <mesh position={[0.56, 1.31, 0.03]} rotation={[0, 0, -0.2]} castShadow>
+            <boxGeometry args={[0.18, 0.13, 0.18]} />
+            <meshStandardMaterial color="#c6cbd0" metalness={0.4} roughness={0.5} />
+          </mesh>
         </>
       )}
     </group>
